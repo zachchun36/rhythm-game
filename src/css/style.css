@@ -1,0 +1,14 @@
+.row {
+  width: 300px;
+  height: 500px;
+  display: flex;
+  list-style-type: none;
+  display: -webkit-flex;
+  padding-left: 0;
+}
+
+.column {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid gray;
+}
