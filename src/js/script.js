@@ -6,6 +6,7 @@ let noteScrollWindowHeight;
 let secondsPassed;
 let oldTimeStamp;
 let fps;
+let mostRecentNoteIndex;
 
 // TODO eventually remap to indices instead of letters (so key remapping language is natural)
 const S_KEYCODE = 83;
@@ -81,10 +82,10 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-for (let i = 0; i < 10000; i++) {
+for (let i = 0; i < 100; i++) {
   TITLE_NOTE_DATA.push(
     {
-      time: i * 0.01 + 1,
+      time: i + 1,
       column: getRandomInt(COLUMNS.length)
     }
   )
@@ -118,19 +119,19 @@ function draw() {
   }
 
 
-    // notes, to look into optimization methods
-    for (let i = 0; i < TITLE_NOTE_DATA.length; i++) {
-      let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
-      if (noteHeight >= 0 && noteHeight <= noteScrollWindowHeight + 10) {
-        context.fillStyle = "gray";
-        context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
-      }
+  // notes, to look into optimization methods
+  for (let i = 0; i < TITLE_NOTE_DATA.length; i++) {
+    let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
+    if (noteHeight >= 0 && noteHeight <= noteScrollWindowHeight + 10) {
+      context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color;
+      context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
     }
+  }
 
 
   // hit timing boxes
   for (let i = 0; i < KEYS.length; i++) {
-    let gradientColor = COLUMNS[i].keyDown ? "orange" : "black";
+    let gradientColor = COLUMNS[i].keyDown ? "yellow" : "black";
     drawGradientTimingBoxes(i, COLUMNS[i].color, gradientColor);
   }
 
@@ -150,21 +151,54 @@ function gameLoop(timeStamp) {
 
   draw();
 
+  let currentTime = sound.currentTime || 0.00;
+  let i = mostRecentNoteIndex + 1;
+  while (i < TITLE_NOTE_DATA.length) {
+    let timePassedSinceNoteTime = currentTime - TITLE_NOTE_DATA[i].time;
+    if (timePassedSinceNoteTime > 0.5) {
+      // note was missed
+      mostRecentNoteIndex = i;
+      console.log('note missed: ' + i);
+    } else if (timePassedSinceNoteTime < 0) {
+      break;
+    }
+    i++;
+  }
+
   // Keep requesting new frames
   window.requestAnimationFrame(gameLoop);
 }
 
 function keydownForIndex(index) {
   if(event.repeat) {
-    console.log(KEYS[index] + 'was held down');
+    // console.log(KEYS[index] + 'was held down');
   } else {
-    console.log(KEYS[index]+ ' was pressed');
-    drawGradientTimingBoxes(index, COLUMNS[index].color, "orange");
+    let currentTime = sound.currentTime || 0.00;
+    let i = mostRecentNoteIndex;
+    while (i < TITLE_NOTE_DATA.length) {
+      let timingDelta = Math.abs(currentTime - TITLE_NOTE_DATA[i].time);
+      if (timingDelta < 0.05) {
+        // note was hit successfully
+        console.log('perfect note hit: ' + i);
+        mostRecentNoteIndex = i;
+        break;
+      } else if (timingDelta < 0.1) {
+        console.log('good note hit: ' + i);
+        mostRecentNoteIndex = i;
+        break;
+      } else if (timingDelta < 0.2) {
+        console.log('bad note hit :' + i);
+        mostRecentNoteIndex = i;
+        break;
+      }
+      i++;
+    }
+    //console.log(KEYS[index]+ ' was pressed');
   }
 }
 
 function keydown(e) {
-  console.log(e.keyCode);
+  // console.log(e.keyCode);
   let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
   if (keyCodeIndex !== -1) {
     COLUMNS[keyCodeIndex].keyDown = true;
@@ -176,23 +210,22 @@ function keyup(e) {
  let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
  if (keyCodeIndex !== -1) {
    COLUMNS[keyCodeIndex].keyDown = false;
-   drawGradientTimingBoxes(keyCodeIndex, COLUMNS[keyCodeIndex].color, "black");
-
  }
-
 }
 
 function init() {
   // Get a reference to the canvas
   canvas = document.getElementById('canvas');
-
   fixDPI();
   columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
   noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
   context = canvas.getContext('2d');
 
-  const button = document.querySelector('button');
+  const button = document.querySelector('#play');
   button.addEventListener('click', playSound);
+
+  const stopButton = document.querySelector('#stop');
+  stopButton.addEventListener('click', () => sound.volume = 0.001);
 
   document.addEventListener('keydown', keydown);
   document.addEventListener('keyup', keyup);
@@ -202,6 +235,7 @@ function init() {
     COLUMNS[i].xPosition = 1.5 * columnWidth + columnWidth * i;
   }
 
+  mostRecentNoteIndex = -1;
   window.requestAnimationFrame(gameLoop);
 }
 
@@ -223,4 +257,5 @@ function fixDPI() {
 function playSound() {
   sound.src = 'mp3s/title.mp3';
   sound.play();
+  sound.volume = 0.1;
 }
