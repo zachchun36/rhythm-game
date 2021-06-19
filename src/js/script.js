@@ -58,10 +58,36 @@ const COLUMNS = [
 ];
 
 
-const TITLE_NOTE_DATA = [0.01, 0.26, 0.52, 0.75];
+const TITLE_NOTE_DATA = [
+  {
+    time: 0.01,
+    column: 0
+  },
+  {
+    time: 0.26,
+    column: 1
+  },
+  {
+    time: 0.52,
+    column: 2
+  },
+  {
+    time: 0.75,
+    column: 3
+  }
+];
 
-for (let i = 0; i < 80; i += 0.03) {
-  TITLE_NOTE_DATA.push(i + 1);
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+for (let i = 0; i < 10000; i++) {
+  TITLE_NOTE_DATA.push(
+    {
+      time: i * 0.01 + 1,
+      column: getRandomInt(COLUMNS.length)
+    }
+  )
 }
 
 function drawGradientTimingBoxes (timingBoxIndex, gradientColor1, gradientColor2) {
@@ -94,12 +120,11 @@ function draw() {
 
     // notes, to look into optimization methods
     for (let i = 0; i < TITLE_NOTE_DATA.length; i++) {
-      let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i]);
-      if (noteHeight <= noteScrollWindowHeight + 10) {
-        context.fillStyle = "white";
-        context.fillRect(1.5 * columnWidth, computeNoteYPosition(TITLE_NOTE_DATA[i]), columnWidth - 1, 7);
+      let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
+      if (noteHeight >= 0 && noteHeight <= noteScrollWindowHeight + 10) {
+        context.fillStyle = "gray";
+        context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
       }
-
     }
 
 
