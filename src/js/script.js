@@ -7,6 +7,8 @@ let secondsPassed;
 let oldTimeStamp;
 let fps;
 let mostRecentNoteIndex;
+let hitNoteCircles = [];
+let hitNoteTexts = [];
 
 // TODO eventually remap to indices instead of letters (so key remapping language is natural)
 const S_KEYCODE = 83;
@@ -25,6 +27,9 @@ window.onload = init;
 
 const KEYS = ["S", "D", "F", "SPACE", "J", "K", "L"];
 const KEY_CODES = [S_KEYCODE, D_KEYCODE, F_KEYCODE, SPACE_KEYCODE, J_KEYCODE, K_KEYCODE, L_KEYCODE];
+
+const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
+const BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 
 
 const COLUMNS = [
@@ -62,19 +67,23 @@ const COLUMNS = [
 const TITLE_NOTE_DATA = [
   {
     time: 0.01,
-    column: 0
+    column: 0,
+    hitY: -1,
   },
   {
     time: 0.26,
-    column: 1
+    column: 1,
+    hitY: -1,
   },
   {
     time: 0.52,
-    column: 2
+    column: 2,
+    hitY: -1,
   },
   {
     time: 0.75,
-    column: 3
+    column: 3,
+    hitY: -1,
   }
 ];
 
@@ -82,11 +91,12 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 10000; i++) {
   TITLE_NOTE_DATA.push(
     {
-      time: i + 1,
-      column: getRandomInt(COLUMNS.length)
+      time: i * 0.3 + 1,
+      column: i % (COLUMNS.length),
+      hitY: -1
     }
   )
 }
@@ -109,6 +119,26 @@ function computeNoteYPosition(noteTime) {
   return noteScrollWindowHeight - timeLeft * 260;
 }
 
+function createHitNoteTextObject(text, index, colorRGB) {
+  hitNoteTexts.push({
+      colorRGB: colorRGB,
+      text: text,
+      columnIndex: index,
+      yOffset: 0,
+      opacity: 1.0
+    }
+  );
+}
+
+
+function createHitNoteCircleObject(y, index) {
+  hitNoteCircles.push({
+      columnIndex: index,
+      yHit: y,
+      radius: 1
+    }
+  );
+}
 
 function draw() {
   context.clearRect(1.5 * columnWidth, 0, 7 * columnWidth, noteScrollWindowHeight + columnWidth - 1);
@@ -121,12 +151,16 @@ function draw() {
 
   // notes, to look into optimization methods
   for (let i = 0; i < TITLE_NOTE_DATA.length; i++) {
-    let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
-    if (noteHeight >= 0 && noteHeight <= noteScrollWindowHeight + 10) {
-      context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color;
-      context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
+    if (TITLE_NOTE_DATA[i].hitY === -1) {
+      let noteHeight = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
+      if (noteHeight >= 0 && noteHeight <= noteScrollWindowHeight + 10) {
+        context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color;
+        context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
+      }
     }
+    // todo optimize to start loop later past old notes
   }
+
 
 
   // hit timing boxes
@@ -135,6 +169,43 @@ function draw() {
     drawGradientTimingBoxes(i, COLUMNS[i].color, gradientColor);
   }
 
+  for (let i = 0; i < hitNoteTexts.length; i++) {
+    //             context.fillStyle = "rgba(255, 0, 0, " + alpha + ")";
+    //monaco
+    // 232, 196, 16
+    /*
+            hitNoteTexts.push({
+                columnIndex: index,
+                yOffset: 0,
+                opacity: 1.0
+              }
+            );
+            */
+    let noteText = hitNoteTexts[i];
+    context.fillStyle = noteText.colorRGB + hitNoteTexts[i].opacity + ")";
+    context.font = "8pt Monaco";
+    context.fillText(noteText.text, COLUMNS[noteText.columnIndex].xPosition, noteScrollWindowHeight - noteText.yOffset * 2);
+    noteText.yOffset += 0.5;
+    noteText.opacity -= 0.015;
+    if (noteText.opacity <= 0) {
+      hitNoteTexts.splice(i, 1);
+      i--;
+    }
+  }
+
+  for (let i = 0; i < hitNoteCircles.length; i++) {
+    // x, y, r,
+    context.strokeStyle = COLUMNS[hitNoteCircles[i].columnIndex].color;
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(COLUMNS[hitNoteCircles[i].columnIndex].xPosition + columnWidth / 2.0, hitNoteCircles[i].yHit, hitNoteCircles[i].radius, 0, 2 * Math.PI);
+    context.stroke();
+    hitNoteCircles[i].radius += 1;
+    if (hitNoteCircles[i].radius > columnWidth / 2.0) {
+      hitNoteCircles.splice(i, 1);
+      i--;
+    }
+  }
 }
 
 function gameLoop(timeStamp) {
@@ -155,7 +226,7 @@ function gameLoop(timeStamp) {
   let i = mostRecentNoteIndex + 1;
   while (i < TITLE_NOTE_DATA.length) {
     let timePassedSinceNoteTime = currentTime - TITLE_NOTE_DATA[i].time;
-    if (timePassedSinceNoteTime > 0.5) {
+    if (timePassedSinceNoteTime > 0.2) {
       // note was missed
       mostRecentNoteIndex = i;
       console.log('note missed: ' + i);
@@ -174,22 +245,33 @@ function keydownForIndex(index) {
     // console.log(KEYS[index] + 'was held down');
   } else {
     let currentTime = sound.currentTime || 0.00;
-    let i = mostRecentNoteIndex;
+    let i = mostRecentNoteIndex + 1;
     while (i < TITLE_NOTE_DATA.length) {
-      let timingDelta = Math.abs(currentTime - TITLE_NOTE_DATA[i].time);
-      if (timingDelta < 0.05) {
-        // note was hit successfully
-        console.log('perfect note hit: ' + i);
-        mostRecentNoteIndex = i;
-        break;
-      } else if (timingDelta < 0.1) {
-        console.log('good note hit: ' + i);
-        mostRecentNoteIndex = i;
-        break;
-      } else if (timingDelta < 0.2) {
-        console.log('bad note hit :' + i);
-        mostRecentNoteIndex = i;
-        break;
+      let currentNote = TITLE_NOTE_DATA[i];
+      if (currentNote.column === index) {
+        let timingDelta = Math.abs(currentTime - currentNote.time);
+        if (timingDelta < 0.05) {
+          // note was hit successfully
+          console.log('perfect note hit: ' + i);
+          mostRecentNoteIndex = i;
+          createHitNoteTextObject("Perfect", index, GOOD_COLOR_RGB);
+          currentNote.hitY = computeNoteYPosition(currentNote.time);
+          createHitNoteCircleObject(currentNote.hitY, index);
+          break;
+        } else if (timingDelta < 0.08) {
+          console.log('good note hit: ' + i);
+          mostRecentNoteIndex = i;
+          createHitNoteTextObject(" Good", index, GOOD_COLOR_RGB);
+          currentNote.hitY = computeNoteYPosition(currentNote.time);
+          createHitNoteCircleObject(currentNote.hitY, index);
+          break;
+        } else if (timingDelta < 0.2) {
+          console.log('bad note hit :' + i);
+          mostRecentNoteIndex = i;
+          createHitNoteTextObject("  Bad", index, BAD_COLOR_RGB);
+          currentNote.hitY = computeNoteYPosition(currentNote.time);
+          break;
+        }
       }
       i++;
     }
@@ -238,6 +320,9 @@ function init() {
   mostRecentNoteIndex = -1;
   window.requestAnimationFrame(gameLoop);
 }
+
+
+
 
 
 function fixDPI() {
