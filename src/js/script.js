@@ -30,6 +30,7 @@ const KEY_CODES = [S_KEYCODE, D_KEYCODE, F_KEYCODE, SPACE_KEYCODE, J_KEYCODE, K_
 
 const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
 const BAD_COLOR_RGB = "rgba(227, 91, 45, ";
+const MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 
 
 const COLUMNS = [
@@ -65,37 +66,44 @@ const COLUMNS = [
 
 
 const TITLE_NOTE_DATA = [
-  {
-    time: 0.01,
-    column: 0,
-    hitY: -1,
-  },
-  {
-    time: 0.26,
-    column: 1,
-    hitY: -1,
-  },
-  {
-    time: 0.52,
-    column: 2,
-    hitY: -1,
-  },
-  {
-    time: 0.75,
-    column: 3,
-    hitY: -1,
-  }
+//  {
+//    time: 0.01,
+//    column: 0,
+//    hitY: -1,
+//  },
+//  {
+//    time: 0.26,
+//    column: 1,
+//    hitY: -1,
+//  },
+//  {
+//    time: 0.52,
+//    column: 2,
+//    hitY: -1,
+//  },
+//  {
+//    time: 0.75,
+//    column: 3,
+//    hitY: -1,
+//  }
 ];
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-for (let i = 0; i < 10000; i++) {
+for (let i = 0; i < 50; i++) {
   TITLE_NOTE_DATA.push(
     {
-      time: i * 0.3 + 1,
+      time: i * 1 + 1,
       column: i % (COLUMNS.length),
+      hitY: -1
+    }
+  )
+  TITLE_NOTE_DATA.push(
+    {
+      time: i * 1 + 1,
+      column: (i + 1 + getRandomInt(6)) % (COLUMNS.length),
       hitY: -1
     }
   )
@@ -158,7 +166,7 @@ function draw() {
         context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, noteHeight, columnWidth - 1, 7);
       }
     }
-    // todo optimize to start loop later past old notes
+    // TODO optimize to start loop later past old notes
   }
 
 
@@ -170,17 +178,6 @@ function draw() {
   }
 
   for (let i = 0; i < hitNoteTexts.length; i++) {
-    //             context.fillStyle = "rgba(255, 0, 0, " + alpha + ")";
-    //monaco
-    // 232, 196, 16
-    /*
-            hitNoteTexts.push({
-                columnIndex: index,
-                yOffset: 0,
-                opacity: 1.0
-              }
-            );
-            */
     let noteText = hitNoteTexts[i];
     context.fillStyle = noteText.colorRGB + hitNoteTexts[i].opacity + ")";
     context.font = "8pt Monaco";
@@ -226,10 +223,11 @@ function gameLoop(timeStamp) {
   let i = mostRecentNoteIndex + 1;
   while (i < TITLE_NOTE_DATA.length) {
     let timePassedSinceNoteTime = currentTime - TITLE_NOTE_DATA[i].time;
-    if (timePassedSinceNoteTime > 0.2) {
+    if (timePassedSinceNoteTime > 0.2 && TITLE_NOTE_DATA[i].hitY === -1) {
       // note was missed
       mostRecentNoteIndex = i;
       console.log('note missed: ' + i);
+      createHitNoteTextObject(" Miss", TITLE_NOTE_DATA[i].column, MISS_COLOR_RGB);
     } else if (timePassedSinceNoteTime < 0) {
       break;
     }
@@ -246,9 +244,17 @@ function keydownForIndex(index) {
   } else {
     let currentTime = sound.currentTime || 0.00;
     let i = mostRecentNoteIndex + 1;
+
+    // TODO Clean this logic up
+    // right now we're subtracting 7 if we can just in case the player hits a note of a 7 note chord
+    // that's at the highest index of the 7 notes.  We don't want to skip the hit detection logic
+    // for the earlier 6 notes so we subtract 7 from our starting index (unless that would go negative
+    // and then we we just default to starting at index 0. We also make sure to only look at notse if the
+    // .hitY is -1 (not hit yet)
+    i = i - 7 >= 0 ? i - 7: 0;
     while (i < TITLE_NOTE_DATA.length) {
       let currentNote = TITLE_NOTE_DATA[i];
-      if (currentNote.column === index) {
+      if (currentNote.column === index && currentNote.hitY === -1) {
         let timingDelta = Math.abs(currentTime - currentNote.time);
         if (timingDelta < 0.05) {
           // note was hit successfully
