@@ -9,6 +9,8 @@ var fps;
 var mostRecentNoteIndex;
 var hitNoteCircles = [];
 var hitNoteTexts = [];
+
+let heldNotesHit = [];
 // TODO eventually remap to indices instead of letters (so key remapping language is natural)
 
 var NOTE_HEIGHT = 7;
@@ -30,32 +32,41 @@ var BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 var MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 var COLUMNS = [
     {
-        color: "#d011c8",
-        keyDown: false
+        color: "rgba(208, 17, 200, ",
+        keyDown: false,
+        holdingDownNote: false
     },
     {
-        color: "#e7bd0d",
-        keyDown: false
+        color: "rgba(231, 189, 13, ",
+        keyDown: false,
+        holdingDownNote: false
     },
     {
-        color: "#9cdf25",
-        keyDown: false
+        color: "rgba(156, 223, 37, ",
+        keyDown: false,
+        holdingDownNote: false
+
     },
     {
-        color: "#3baedb",
-        keyDown: false
+        color: "rgba(59, 174, 219, ",
+        keyDown: false,
+        holdingDownNote: false
+
     },
     {
-        color: "#9cdf25",
-        keyDown: false
+        color: "rgba(156, 223, 37, ",
+        keyDown: false,
+        holdingDownNote: false
     },
     {
-        color: "#e7bd0d",
-        keyDown: false
+        color: "rgba(231, 189, 13, ",
+        keyDown: false,
+        holdingDownNote: false
     },
     {
-        color: "#d011c8",
-        keyDown: false
+        color: "rgba(208, 17, 200, ",
+        keyDown: false,
+        holdingDownNote: false
     },
 ];
 var TITLE_NOTE_DATA = [
@@ -85,9 +96,15 @@ function getRandomInt(max) {
 }
 for (var i = 0; i < 50; i++) {
     TITLE_NOTE_DATA.push({
-        time: i + 1,
-        endTime: (i + 1) + 1,
+        time: i * 2 + 1,
+        endTime: (i + 1) * 2 + 1,
         column: i % (COLUMNS.length),
+        hitY: -1
+    });
+    TITLE_NOTE_DATA.push({
+        time: i * 2 + 1,
+        endTime: (i + 1) * 2 + 1,
+        column: (i + 1) % (COLUMNS.length),
         hitY: -1
     });
 }
@@ -139,7 +156,7 @@ function draw() {
         if (TITLE_NOTE_DATA[i].hitY === -1) {
             let yPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
             if (yPosition >= 0 && yPosition <= noteScrollWindowHeight) {
-                context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color;
+                context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color + " 1)";
 
                 if (TITLE_NOTE_DATA[i].endTime) {
                   let endYPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].endTime);
@@ -147,15 +164,25 @@ function draw() {
                   context.fillRect(computeNoteTailXPosition(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition), endYPosition, NOTE_HEIGHT, tailHeight);
                 }
                 context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, yPosition, columnWidth - 1, NOTE_HEIGHT);
+
             }
         }
         // TODO optimize to start loop later past old notes
     }
-    // hit timing boxes
+
     for (var i = 0; i < KEYS.length; i++) {
+        // hit timing boxes
         var gradientColor = COLUMNS[i].keyDown ? "yellow" : "black";
-        drawGradientTimingBoxes(i, COLUMNS[i].color, gradientColor);
+        drawGradientTimingBoxes(i, COLUMNS[i].color + " 1)", gradientColor);
+
+        // fake notes for correctly held down notes
+        if (COLUMNS[i].holdingDownNote) {
+            context.fillStyle = COLUMNS[i].color + " 1)";
+            context.fillRect(COLUMNS[i].xPosition, noteScrollWindowHeight - (NOTE_HEIGHT / 2.0), columnWidth - 1, NOTE_HEIGHT);
+        }
     }
+
+
     for (var i = 0; i < hitNoteTexts.length; i++) {
         var noteText = hitNoteTexts[i];
         context.fillStyle = noteText.colorRGB + hitNoteTexts[i].opacity + ")";
@@ -170,7 +197,7 @@ function draw() {
     }
     for (var i = 0; i < hitNoteCircles.length; i++) {
         // x, y, r,
-        context.strokeStyle = COLUMNS[hitNoteCircles[i].columnIndex].color;
+        context.strokeStyle = COLUMNS[hitNoteCircles[i].columnIndex].color + " 1)";
         context.lineWidth = 3;
         context.beginPath();
         context.arc(COLUMNS[hitNoteCircles[i].columnIndex].xPosition + columnWidth / 2.0, hitNoteCircles[i].yHit, hitNoteCircles[i].radius, 0, 2 * Math.PI);
@@ -182,6 +209,27 @@ function draw() {
         }
     }
 }
+
+function heldNoteActionsForIndex(index) {
+    var currentTime = sound.currentTime || 0.00;
+    let i = 0;
+    while (i < heldNotesHit.length) {
+        if (heldNotesHit[i].column === index) {
+            // draw animations for held correctly
+            COLUMNS[index].holdingDownNote = true;
+
+            // console.log('held note correctly for index: ' + index);
+            if (heldNotesHit[i].endTime - currentTime < 0.05 ) {
+                COLUMNS[index].holdingDownNote = false;
+                heldNotesHit.splice(i, 1);
+                i--;
+                console.log('held note completed for index: ' + index);
+            }
+        }
+        i++;
+    }
+}
+
 function gameLoop(timeStamp) {
     context.clearRect(0, 0, 50, 50);
     // Calculate the number of seconds passed since the last frame
@@ -209,15 +257,24 @@ function gameLoop(timeStamp) {
         }
         i++;
     }
+
+    for (let i = 0; i < COLUMNS.length; i++) {
+      if (COLUMNS[i].keyDown) {
+        heldNoteActionsForIndex(i);
+      } else {
+        releaseHeldNoteForIndex(i);
+      }
+    }
     // Keep requesting new frames
     window.requestAnimationFrame(gameLoop);
 }
 function keydownForIndex(index) {
+    var currentTime = sound.currentTime || 0.00;
     if (event.repeat) {
-        // console.log(KEYS[index] + 'was held down');
+        //no op for now
     }
     else {
-        var currentTime = sound.currentTime || 0.00;
+
         var i = mostRecentNoteIndex + 1;
         // TODO Clean this logic up
         // right now we're subtracting 7 if we can just in case the player hits a note of a 7 note chord
@@ -237,6 +294,9 @@ function keydownForIndex(index) {
                     createHitNoteTextObject("Perfect", index, GOOD_COLOR_RGB);
                     currentNote.hitY = computeNoteYPosition(currentNote.time);
                     createHitNoteCircleObject(currentNote.hitY, index);
+                    if (currentNote.endTime) {
+                        heldNotesHit.push(currentNote)
+                    }
                     break;
                 }
                 else if (timingDelta < 0.08) {
@@ -260,6 +320,19 @@ function keydownForIndex(index) {
         //console.log(KEYS[index]+ ' was pressed');
     }
 }
+
+function releaseHeldNoteForIndex(index) {
+    for (let i = 0; i < heldNotesHit.length; i++) {
+        if (heldNotesHit[i].column === index) {
+            COLUMNS[index].holdingDownNote = false;
+            console.log("column released for index: " + index);
+            heldNotesHit.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+
 function keydown(e) {
     // console.log(e.keyCode);
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
