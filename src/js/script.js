@@ -9,8 +9,9 @@ var fps;
 var mostRecentNoteIndex;
 var hitNoteCircles = [];
 var hitNoteTexts = [];
-
 let heldNotesHit = [];
+var hitNotePulse = [0, 0];
+var rEffects = [0, 0, 0, 0, 0, 0, 0];
 // TODO eventually remap to indices instead of letters (so key remapping language is natural)
 
 var NOTE_HEIGHT = 7;
@@ -91,9 +92,11 @@ var TITLE_NOTE_DATA = [
 //    hitY: -1,
 //  }
 ];
+
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
+
 for (var i = 0; i < 50; i++) {
     TITLE_NOTE_DATA.push({
         time: i * 2 + 1,
@@ -108,6 +111,7 @@ for (var i = 0; i < 50; i++) {
         hitY: -1
     });
 }
+
 function drawGradientTimingBoxes(timingBoxIndex, gradientColor1, gradientColor2) {
     // gradient dimensions is twice as big as the rectangle we draw since we dont wnat a full gradient to black / blue, we just want some partial shading
     var grd = context.createLinearGradient(0, noteScrollWindowHeight, 0, (2.0 / 3.0) * canvas.height + (2 * (columnWidth - 1)));
@@ -117,12 +121,24 @@ function drawGradientTimingBoxes(timingBoxIndex, gradientColor1, gradientColor2)
     // draw timing box
     context.fillRect(COLUMNS[timingBoxIndex].xPosition, noteScrollWindowHeight, columnWidth - 1, (columnWidth - 1));
 }
+
+function drawFullGradientTimingBoxes(timingBoxIndex, gradientColor1, gradientColor2) {
+    // partial shading
+    var grd = context.createLinearGradient(0, 0, 0,  canvas.height + (2 * (columnWidth - 1)));
+    grd.addColorStop(0, gradientColor1);
+    grd.addColorStop(1, gradientColor2);
+    context.fillStyle = grd;
+    // width of full gradient effect
+    context.fillRect(COLUMNS[timingBoxIndex].xPosition + 0.5 * rEffects[timingBoxIndex], 0, columnWidth - 1 * rEffects[timingBoxIndex] - 1, noteScrollWindowHeight);
+}
+
 function computeNoteYPosition(noteTime) {
     var currentTime = sound.currentTime || 0.00;
     var timeLeft = noteTime - sound.currentTime;
     // delete note / dont draw after its negative later
     return noteScrollWindowHeight - timeLeft * 300 ;
 }
+
 function createHitNoteTextObject(text, index, colorRGB) {
     hitNoteTexts.push({
         colorRGB: colorRGB,
@@ -132,6 +148,7 @@ function createHitNoteTextObject(text, index, colorRGB) {
         opacity: 1.0
     });
 }
+
 function createHitNoteCircleObject(y, index) {
     hitNoteCircles.push({
         columnIndex: index,
@@ -150,6 +167,20 @@ function draw() {
     for (var i = 0; i < KEYS.length; i++) {
         context.fillStyle = "black";
         context.fillRect(COLUMNS[i].xPosition, 0, columnWidth - 1, noteScrollWindowHeight);
+        context.fillStyle = "rgba(128, 0, 0, 1)";
+        context.fillRect(COLUMNS[i].xPosition, noteScrollWindowHeight - columnWidth / 25, columnWidth - 1, columnWidth / 25);
+        // draw full gradient timing boxes
+        // grdOpacity = speed of gradient transparency
+        var grdOpacity = (1 - rEffects[i] * 0.05);
+        var gradientColor = (rEffects[i] < columnWidth/2) ? COLUMNS[i].color + grdOpacity: "rgba(0, 0, 0, " + grdOpacity;
+        if (COLUMNS[i].keyDown) {
+            rEffects[i] = 0;
+        }
+        drawFullGradientTimingBoxes(i, "rgba(0, 0, 0, " + grdOpacity, gradientColor)
+        // speed
+        if (rEffects[i] < columnWidth/2) {
+            rEffects[i]++;
+        }
     }
     // notes, to look into optimization methods
     for (var i = 0; i < TITLE_NOTE_DATA.length; i++) {
@@ -169,7 +200,6 @@ function draw() {
         }
         // TODO optimize to start loop later past old notes
     }
-
     for (var i = 0; i < KEYS.length; i++) {
         // hit timing boxes
         var gradientColor = COLUMNS[i].keyDown ? "yellow" : "black";
@@ -181,8 +211,23 @@ function draw() {
             context.fillRect(COLUMNS[i].xPosition, noteScrollWindowHeight - (NOTE_HEIGHT / 2.0), columnWidth - 1, NOTE_HEIGHT);
         }
     }
-
-
+    // cyan pulse
+    if (hitNotePulse[1] >= 0.4 * columnWidth) {
+        hitNotePulse[0] = 0;
+    }
+    if (hitNotePulse[1] < 0){
+        hitNotePulse[1] = 0;
+    }
+    // pulse speed
+    var pulseDelta = (hitNotePulse[0] - 0.5) * 2
+    hitNotePulse[1] += pulseDelta
+    var grd = context.createLinearGradient(0, noteScrollWindowHeight - hitNotePulse[1], 0, noteScrollWindowHeight);
+    grd.addColorStop(0, "rgba(72, 209, 204, 0)");
+    grd.addColorStop(1, "rgba(72, 209, 204, 0.8)");
+    context.fillStyle = grd;
+    context.fillRect(COLUMNS[0].xPosition, noteScrollWindowHeight - hitNotePulse[1], columnWidth * 7 - 1, hitNotePulse[1] + 1);
+    //
+    //console.log(hitNotePulse[0] + " " + hitNotePulse[1]);
     for (var i = 0; i < hitNoteTexts.length; i++) {
         var noteText = hitNoteTexts[i];
         context.fillStyle = noteText.colorRGB + hitNoteTexts[i].opacity + ")";
@@ -207,7 +252,7 @@ function draw() {
             hitNoteCircles.splice(i, 1);
             i--;
         }
-    }
+    }    
 }
 
 function heldNoteActionsForIndex(index) {
@@ -231,7 +276,7 @@ function heldNoteActionsForIndex(index) {
 }
 
 function gameLoop(timeStamp) {
-    context.clearRect(0, 0, 50, 50);
+    context.clearRect(0, 0, canvas.width, canvas.height);
     // Calculate the number of seconds passed since the last frame
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
     oldTimeStamp = timeStamp;
@@ -268,6 +313,7 @@ function gameLoop(timeStamp) {
     // Keep requesting new frames
     window.requestAnimationFrame(gameLoop);
 }
+
 function keydownForIndex(index) {
     var currentTime = sound.currentTime || 0.00;
     if (event.repeat) {
@@ -297,6 +343,7 @@ function keydownForIndex(index) {
                     if (currentNote.endTime) {
                         heldNotesHit.push(currentNote)
                     }
+                    hitNotePulse[0] = 1;
                     break;
                 }
                 else if (timingDelta < 0.08) {
@@ -305,6 +352,7 @@ function keydownForIndex(index) {
                     createHitNoteTextObject(" Good", index, GOOD_COLOR_RGB);
                     currentNote.hitY = computeNoteYPosition(currentNote.time);
                     createHitNoteCircleObject(currentNote.hitY, index);
+                    hitNotePulse[0] = 1;
                     break;
                 }
                 else if (timingDelta < 0.2) {
@@ -312,6 +360,7 @@ function keydownForIndex(index) {
                     mostRecentNoteIndex = i;
                     createHitNoteTextObject("  Bad", index, BAD_COLOR_RGB);
                     currentNote.hitY = computeNoteYPosition(currentNote.time);
+                    hitNotePulse[0] = 1;
                     break;
                 }
             }
@@ -332,7 +381,6 @@ function releaseHeldNoteForIndex(index) {
     }
 }
 
-
 function keydown(e) {
     // console.log(e.keyCode);
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
@@ -341,12 +389,14 @@ function keydown(e) {
         keydownForIndex(keyCodeIndex);
     }
 }
+
 function keyup(e) {
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
         COLUMNS[keyCodeIndex].keyDown = false;
     }
 }
+
 function init() {
     // Get a reference to the canvas
     canvas = document.getElementById('canvas');
@@ -370,6 +420,7 @@ function init() {
     mostRecentNoteIndex = -1;
     window.requestAnimationFrame(gameLoop);
 }
+
 function fixDPI() {
     var dpi = window.devicePixelRatio;
     //get CSS height
@@ -382,6 +433,7 @@ function fixDPI() {
     canvas.setAttribute('height', styleHeight * dpi);
     canvas.setAttribute('width', styleWidth * dpi);
 }
+
 function playSound() {
     sound.src = 'mp3s/title.mp3';
     sound.play();
