@@ -195,18 +195,24 @@ function draw() {
     }
     // notes, to look into optimization methods
     for (var i = 0; i < TITLE_NOTE_DATA.length; i++) {
+        let yPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
         if (TITLE_NOTE_DATA[i].hitY === -1) {
-            let yPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].time);
             if (yPosition >= 0 && yPosition <= noteScrollWindowHeight) {
                 context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color + " 1)";
-
-                if (TITLE_NOTE_DATA[i].endTime) {
-                  let endYPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].endTime);
-                  let tailHeight = yPosition - endYPosition;
-                  context.fillRect(computeNoteTailXPosition(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition), endYPosition, NOTE_HEIGHT, tailHeight);
-                }
                 context.fillRect(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition, yPosition, columnWidth - 1, NOTE_HEIGHT);
-
+            }
+        }
+        if (TITLE_NOTE_DATA[i].endTime &&
+            (COLUMNS[TITLE_NOTE_DATA[i].column].holdingDownNote ||
+            (TITLE_NOTE_DATA[i].hitY === -1 && sound.currentTime < TITLE_NOTE_DATA[i].time + 0.2))) {
+            context.fillStyle = COLUMNS[TITLE_NOTE_DATA[i].column].color + " 1)";
+            let endYPosition = computeNoteYPosition(TITLE_NOTE_DATA[i].endTime);
+            let tailHeight = yPosition - endYPosition;
+            if (tailHeight + endYPosition >= noteScrollWindowHeight) {
+                tailHeight = noteScrollWindowHeight - endYPosition;
+            }
+            if (endYPosition + tailHeight >= 0 && endYPosition <= noteScrollWindowHeight) {
+                context.fillRect(computeNoteTailXPosition(COLUMNS[TITLE_NOTE_DATA[i].column].xPosition), endYPosition, NOTE_HEIGHT, tailHeight);
             }
         }
         // TODO optimize to start loop later past old notes
