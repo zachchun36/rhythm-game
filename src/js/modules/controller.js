@@ -21,6 +21,13 @@ const KEY_CODES = [
     L_KEYCODE
 ];
 
+const sevenRecentKeyPresses = [];
+
+const FORWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => i);
+const BACKWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => KEYS.length - i - 1);
+console.log(FORWARDS_FLAIR);
+console.log(BACKWARDS_FLAIR);
+
 let mostRecentNoteIndex;
 
 function start() {
@@ -61,6 +68,11 @@ function gameLoop(timeStamp) {
             releaseHeldNoteForIndex(i);
         }
     }
+
+    if (GameState.smoothieTime) {
+        GameState.changeBeetJuice(-0.2);
+    }
+    
     // Keep requesting new frames
     window.requestAnimationFrame(gameLoop);
 }
@@ -79,6 +91,7 @@ function updateForMisses() {
             mostRecentNoteIndex = i;
             console.log("note missed: " + i);
             GameState.notes[i].missTriggered = true;
+            GameState.changeBeetJuice(-2);
             Render.drawNoteTimingEffects(
                 GameState.NOTE_TIMINGS.MISS,
                 null,
@@ -91,11 +104,42 @@ function updateForMisses() {
     }
 }
 
+function inputsMatchesFlair(idealFlair) {
+    for (let i = 0; i < sevenRecentKeyPresses.length; i++) {
+        if (sevenRecentKeyPresses[i] !== idealFlair[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function detectFlair(index) {
+    sevenRecentKeyPresses.push(index);
+    
+    if (sevenRecentKeyPresses.length > KEYS.length) {
+        sevenRecentKeyPresses.shift();
+    }
+
+    if (sevenRecentKeyPresses.length === KEYS.length) {
+        console.log(sevenRecentKeyPresses);
+        return inputsMatchesFlair(FORWARDS_FLAIR) || inputsMatchesFlair(BACKWARDS_FLAIR);
+    }
+}
+
+
 function keydownForIndex(index) {
     let currentTime = GameState.song.currentTime || 0.0;
     if (event.repeat) {
         //no op for now
     } else {
+        if (detectFlair(index)) {
+            if (GameState.beetJuice >= GameState.SMOOTHIE_TIME_THRESHOlD) {
+                GameState.activateSmoothieTime();
+                console.log('smoothie time activated');
+            }
+            GameState.changeBeetJuice(2); 
+            console.log('flair party!');
+        }
         let i = getSafeStartingIndex();
         while (i < GameState.notes.length) {
             let currentNote = GameState.notes[i];
@@ -109,12 +153,15 @@ function keydownForIndex(index) {
                     if (currentNote.endTime) {
                         GameState.heldNotesHit.push(currentNote);
                     }
+                    GameState.changeBeetJuice(2);
                 } else if (timingDelta < 0.08) {
                     console.log("good note hit: " + i);
                     noteTiming = GameState.NOTE_TIMINGS.GOOD;
+                    GameState.changeBeetJuice(1);
                 } else if (timingDelta < 0.2) {
                     console.log("bad note hit :" + i);
                     noteTiming = GameState.NOTE_TIMINGS.BAD;
+                    GameState.changeBeetJuice(-1);
                 }
                 if (noteTiming) {
                     mostRecentNoteIndex = i;

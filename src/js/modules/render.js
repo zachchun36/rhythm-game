@@ -31,23 +31,30 @@ var GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
 var BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 var MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 
+
+const BEET_JUICE_BAR_WIDTH = 3;
+
 function draw(timeStamp) {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "black";
+    context.fillRect(0, 0, canvas.width, canvas.height);
     secondsPassed = (timeStamp - oldTimeStamp) / 1000;
     oldTimeStamp = timeStamp;
     fps = Math.round(1 / secondsPassed);
     if (!isNaN(fps)) {
         context.font = "12px Arial";
-        context.fillStyle = "black";
+        context.fillStyle = "white";
         context.fillText("FPS: " + fps, 5, 30);
     }
     context.clearRect(
         1.5 * columnWidth,
         0,
-        7 * columnWidth,
+        7 * columnWidth - 1,
         noteScrollWindowHeight + columnWidth - 1
     );
     drawColumnsAndGradients();
+    drawBeetJuiceBar();
+    drawSmoothieTimeGlow();
     drawHitTimingBoxes();
     drawNotes();
     drawFakeHeldNotes();
@@ -118,6 +125,57 @@ function drawGradientForNoteScrollWindowKeyHold(
         columnWidth - 1 * columnFadeoutProgress[timingBoxIndex] - 1,
         noteScrollWindowHeight
     );
+}
+
+function drawSmoothieTimeGlow() {
+    if (GameState.smoothieTime) {
+        var grd = context.createLinearGradient(
+            GameState.columns[0].xPosition,
+            -200, // arbitrary gradient
+            GameState.columns[0].xPosition,
+            1.3 * noteScrollWindowHeight
+        );
+        grd.addColorStop(0, "rgba(0, 0, 0, 0)");
+        grd.addColorStop(1, "rgba(214, 185, 11, .5");
+        context.fillStyle = grd;
+        context.fillRect(
+            GameState.columns[0].xPosition,
+            0,
+            columnWidth * GameState.columns.length - 1,
+            noteScrollWindowHeight
+        );
+    }
+}
+
+function drawBeetJuiceBar() {
+    let endColumnsXPosition = GameState.columns.length * columnWidth + GameState.columns[0].xPosition - 1;
+    var grd = context.createLinearGradient(
+        endColumnsXPosition,
+        0,
+        endColumnsXPosition + BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight
+    );
+    grd.addColorStop(0, "rgba(256, 256, 256, .3)");
+    grd.addColorStop(1, "rgba(256, 256, 256, 1)");
+    context.fillStyle = grd;
+    context.fillRect(
+        endColumnsXPosition,
+        0,
+        BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight
+    );
+
+    if (GameState.beetJuice >= GameState.SMOOTHIE_TIME_THRESHOlD && !GameState.smoothieTime) {
+        context.fillStyle = "#ea3788"
+    } else {
+        context.fillStyle = "#9a294c";
+    }
+    context.fillRect(
+        endColumnsXPosition,
+        noteScrollWindowHeight * (1 - GameState.beetJuice / 100.0),
+        BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight * GameState.beetJuice / 100.0
+    )
 }
 
 function computeNoteYPosition(noteTime) {

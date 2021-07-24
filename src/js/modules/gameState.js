@@ -6,6 +6,14 @@ const NOTE_TIMINGS = {
     BAD: "BAD",
     MISS: "MISS"
 };
+
+const MAX_BEET_JUICE = 100;
+const MIN_BEET_JUICE = 0;
+const SMOOTHIE_TIME_THRESHOlD = 69;
+let beetJuice = 100;
+let smoothieTime = false;
+
+
 const notes = [];
 const heldNotesHit = [];
 const song = new Audio("mp3s/title.mp3");
@@ -54,17 +62,28 @@ function getRandomInt(max) {
 // held note chords slow
 for (var i = 0; i < 50; i++) {
     notes.push({
-        time: i * 2 + 1,
-        endTime: (i + 1) * 2 + 1,
-        column: i % columns.length,
+        time: i * 0.1 + 1,
+        // endTime: (i + 1) * 2 + 1,
+        column: (i * 2) % columns.length,
         hitY: -1
     });
-    notes.push({
-        time: i * 2 + 1,
-        endTime: (i + 1) * 2 + 1,
-        column: (i + 1) % columns.length,
-        hitY: -1
-    });
+
 }
 
-export { notes, columns, song, heldNotesHit, NOTE_TIMINGS };
+
+function changeBeetJuice(amount) {
+    beetJuice += amount;
+    if (beetJuice > MAX_BEET_JUICE) {
+        beetJuice = MAX_BEET_JUICE;
+    } else if (beetJuice < MIN_BEET_JUICE) {
+        beetJuice = MIN_BEET_JUICE;
+        smoothieTime = false;
+    }
+    console.log("beetJuice: " + beetJuice);
+}
+
+function activateSmoothieTime() {
+    smoothieTime = true;
+}
+
+export { notes, columns, song, heldNotesHit, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, NOTE_TIMINGS };
