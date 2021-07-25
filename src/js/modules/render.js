@@ -32,7 +32,9 @@ var BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 var MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 
 
-const BEET_JUICE_BAR_WIDTH = 3;
+const PROGRESS_BAR_WIDTH = 3;
+
+let noteScrollWindowHeightPlusTimingBoxes;
 
 function draw(timeStamp) {
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -71,6 +73,7 @@ function initialRender() {
     fixDPI();
     columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
     noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
+    noteScrollWindowHeightPlusTimingBoxes = noteScrollWindowHeight + columnWidth - 1
     context = canvas.getContext("2d");
 
     // Compute column x positions
@@ -79,12 +82,12 @@ function initialRender() {
     }
 }
 
-function drawProgressBar(xPosition, progressYPosition, height, color) {
+function drawProgressBar(xPosition, progress, color) {
     let grd = context.createLinearGradient(
         xPosition,
         0,
-        xPosition + BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight
+        xPosition + PROGRESS_BAR_WIDTH,
+        noteScrollWindowHeightPlusTimingBoxes
     );
     grd.addColorStop(0, "rgba(256, 256, 256, .3)");
     grd.addColorStop(1, "rgba(256, 256, 256, 1)");
@@ -92,22 +95,21 @@ function drawProgressBar(xPosition, progressYPosition, height, color) {
     context.fillRect(
         xPosition,
         0,
-        BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight
+        PROGRESS_BAR_WIDTH,
+        noteScrollWindowHeightPlusTimingBoxes
     );
     context.fillStyle = color;
     context.fillRect(
         xPosition,
-        progressYPosition,
-        BEET_JUICE_BAR_WIDTH,
-        height
+        noteScrollWindowHeightPlusTimingBoxes - progress,
+        PROGRESS_BAR_WIDTH,
+        progress
     )
 }
 
 function drawSongProgressBar() {
-    let completionProgress = noteScrollWindowHeight * GameState.song.currentTime / GameState.song.duration;
-    drawProgressBar(GameState.columns[0].xPosition - BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight - completionProgress,
+    let completionProgress = noteScrollWindowHeightPlusTimingBoxes * GameState.song.currentTime / GameState.song.duration;
+    drawProgressBar(GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
         completionProgress,
         "#42a4f5"
     )
@@ -190,9 +192,16 @@ function drawBeetJuiceBar() {
     } else {
         color = "#9a294c";
     }
-    let completionProgress = noteScrollWindowHeight * GameState.beetJuice / 100.0;
-    drawProgressBar(endColumnsXPosition, noteScrollWindowHeight - completionProgress, completionProgress, color);
-
+    let completionProgress = noteScrollWindowHeightPlusTimingBoxes * GameState.beetJuice / 100.0;
+    drawProgressBar(endColumnsXPosition, completionProgress, color);
+    let smoothieTimeThresholdYPosition = noteScrollWindowHeightPlusTimingBoxes - (noteScrollWindowHeightPlusTimingBoxes * GameState.SMOOTHIE_TIME_THRESHOlD / 100.0);
+    context.fillStyle = "white";
+    context.fillRect(
+        endColumnsXPosition,
+        smoothieTimeThresholdYPosition,
+        PROGRESS_BAR_WIDTH,
+        1
+    )
 }
 
 function computeNoteYPosition(noteTime) {
