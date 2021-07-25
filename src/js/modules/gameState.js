@@ -10,13 +10,13 @@ const NOTE_TIMINGS = {
 const MAX_BEET_JUICE = 100;
 const MIN_BEET_JUICE = 0;
 const SMOOTHIE_TIME_THRESHOlD = 69;
-let beetJuice = 100;
+let beetJuice = 50;
 let smoothieTime = false;
 
 
 const notes = [];
 const heldNotesHit = [];
-const song = new Audio("mp3s/title.mp3");
+const song = new Audio("mp3s/snow-drop.mp3");
 const columns = [
     {
         color: "rgba(208, 17, 200, ",
@@ -60,9 +60,9 @@ function getRandomInt(max) {
 }
 
 // held note chords slow
-for (var i = 0; i < 50; i++) {
+for (var i = 0; i < 350; i++) {
     notes.push({
-        time: i * 0.1 + 1,
+        time: i * 0.3 + 1,
         // endTime: (i + 1) * 2 + 1,
         column: (i * 2) % columns.length,
         hitY: -1

@@ -54,6 +54,7 @@ function draw(timeStamp) {
     );
     drawColumnsAndGradients();
     drawBeetJuiceBar();
+    drawSongProgressBar();
     drawSmoothieTimeGlow();
     drawHitTimingBoxes();
     drawNotes();
@@ -76,6 +77,40 @@ function initialRender() {
     for (var i = 0; i < GameState.columns.length; i++) {
         GameState.columns[i].xPosition = 1.5 * columnWidth + columnWidth * i;
     }
+}
+
+function drawProgressBar(xPosition, progressYPosition, height, color) {
+    let grd = context.createLinearGradient(
+        xPosition,
+        0,
+        xPosition + BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight
+    );
+    grd.addColorStop(0, "rgba(256, 256, 256, .3)");
+    grd.addColorStop(1, "rgba(256, 256, 256, 1)");
+    context.fillStyle = grd;
+    context.fillRect(
+        xPosition,
+        0,
+        BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight
+    );
+    context.fillStyle = color;
+    context.fillRect(
+        xPosition,
+        progressYPosition,
+        BEET_JUICE_BAR_WIDTH,
+        height
+    )
+}
+
+function drawSongProgressBar() {
+    let completionProgress = noteScrollWindowHeight * GameState.song.currentTime / GameState.song.duration;
+    drawProgressBar(GameState.columns[0].xPosition - BEET_JUICE_BAR_WIDTH,
+        noteScrollWindowHeight - completionProgress,
+        completionProgress,
+        "#42a4f5"
+    )
 }
 
 function drawGradientTimingBoxes(
@@ -149,33 +184,15 @@ function drawSmoothieTimeGlow() {
 
 function drawBeetJuiceBar() {
     let endColumnsXPosition = GameState.columns.length * columnWidth + GameState.columns[0].xPosition - 1;
-    var grd = context.createLinearGradient(
-        endColumnsXPosition,
-        0,
-        endColumnsXPosition + BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight
-    );
-    grd.addColorStop(0, "rgba(256, 256, 256, .3)");
-    grd.addColorStop(1, "rgba(256, 256, 256, 1)");
-    context.fillStyle = grd;
-    context.fillRect(
-        endColumnsXPosition,
-        0,
-        BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight
-    );
-
+    let color;
     if (GameState.beetJuice >= GameState.SMOOTHIE_TIME_THRESHOlD && !GameState.smoothieTime) {
-        context.fillStyle = "#ea3788"
+        color = "#ea3788"
     } else {
-        context.fillStyle = "#9a294c";
+        color = "#9a294c";
     }
-    context.fillRect(
-        endColumnsXPosition,
-        noteScrollWindowHeight * (1 - GameState.beetJuice / 100.0),
-        BEET_JUICE_BAR_WIDTH,
-        noteScrollWindowHeight * GameState.beetJuice / 100.0
-    )
+    let completionProgress = noteScrollWindowHeight * GameState.beetJuice / 100.0;
+    drawProgressBar(endColumnsXPosition, noteScrollWindowHeight - completionProgress, completionProgress, color);
+
 }
 
 function computeNoteYPosition(noteTime) {
