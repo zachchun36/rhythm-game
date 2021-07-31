@@ -70,7 +70,7 @@ function gameLoop(timeStamp) {
     }
 
     if (GameState.smoothieTime) {
-        GameState.changeBeetJuice(-0.2);
+        GameState.changeBeetJuice(-0.1);
     }
     
     // Keep requesting new frames
@@ -137,7 +137,8 @@ function keydownForIndex(index) {
                 GameState.activateSmoothieTime();
                 console.log('smoothie time activated');
             }
-            GameState.changeBeetJuice(2); 
+            GameState.changeBeetJuice(.7); 
+            Render.drawFlairEffects();
             console.log('flair party!');
         }
         let i = getSafeStartingIndex();
@@ -153,11 +154,11 @@ function keydownForIndex(index) {
                     if (currentNote.endTime) {
                         GameState.heldNotesHit.push(currentNote);
                     }
-                    GameState.changeBeetJuice(2);
+                    GameState.changeBeetJuice(1);
                 } else if (timingDelta < 0.08) {
                     console.log("good note hit: " + i);
                     noteTiming = GameState.NOTE_TIMINGS.GOOD;
-                    GameState.changeBeetJuice(1);
+                    GameState.changeBeetJuice(.4);
                 } else if (timingDelta < 0.2) {
                     console.log("bad note hit :" + i);
                     noteTiming = GameState.NOTE_TIMINGS.BAD;

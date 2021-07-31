@@ -36,6 +36,14 @@ const PROGRESS_BAR_WIDTH = 3;
 
 let noteScrollWindowHeightPlusTimingBoxes;
 
+
+let flairOpacity = 0;
+
+const MAX_FLAIR_GLOW_OPACITY = 0.5;
+const FLAIR_FADE_RATE = 1.0 / 50.0;
+let recentlyInSmoothieTime = true;
+
+
 function draw(timeStamp) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "black";
@@ -57,6 +65,7 @@ function draw(timeStamp) {
     drawColumnsAndGradients();
     drawBeetJuiceBar();
     drawSongProgressBar();
+    drawFlairGlowFade();
     drawSmoothieTimeGlow();
     drawHitTimingBoxes();
     drawNotes();
@@ -164,23 +173,49 @@ function drawGradientForNoteScrollWindowKeyHold(
     );
 }
 
+function drawYellowGlow(opacity) {
+    var grd = context.createLinearGradient(
+        GameState.columns[0].xPosition,
+        -200, // arbitrary gradient
+        GameState.columns[0].xPosition,
+        1.3 * noteScrollWindowHeight
+    );
+    grd.addColorStop(0, "rgba(0, 0, 0, 0)");
+    grd.addColorStop(1, "rgba(214, 185, 11, " + opacity);
+    context.fillStyle = grd;
+    context.fillRect(
+        GameState.columns[0].xPosition,
+        0,
+        columnWidth * GameState.columns.length - 1,
+        noteScrollWindowHeight
+    );
+}
+
+function drawFlairEffects() {
+    if (!GameState.smoothieTime) {
+        flairOpacity = MAX_FLAIR_GLOW_OPACITY;
+    }
+}
+
+function drawFlairGlowFade() {
+    if (flairOpacity >= 0) {
+        drawYellowGlow(flairOpacity);
+        flairOpacity -= MAX_FLAIR_GLOW_OPACITY * FLAIR_FADE_RATE;
+    }
+
+    // need to decrease flair opacity constantly
+    // need to keep /calling this flairGlow function
+    // call from the controller to trigger the opacity to be set to MAX_FLAIR_GLOW_OPACITY
+}
+
 function drawSmoothieTimeGlow() {
     if (GameState.smoothieTime) {
-        var grd = context.createLinearGradient(
-            GameState.columns[0].xPosition,
-            -200, // arbitrary gradient
-            GameState.columns[0].xPosition,
-            1.3 * noteScrollWindowHeight
-        );
-        grd.addColorStop(0, "rgba(0, 0, 0, 0)");
-        grd.addColorStop(1, "rgba(214, 185, 11, .5");
-        context.fillStyle = grd;
-        context.fillRect(
-            GameState.columns[0].xPosition,
-            0,
-            columnWidth * GameState.columns.length - 1,
-            noteScrollWindowHeight
-        );
+        drawYellowGlow(MAX_FLAIR_GLOW_OPACITY);
+        recentlyInSmoothieTime = true;
+    }
+    if (recentlyInSmoothieTime) {
+        recentlyInSmoothieTime = false;
+        flairOpacity = MAX_FLAIR_GLOW_OPACITY;
     }
 }
 
@@ -459,4 +494,4 @@ function drawNoteTimingEffects(noteTiming, hitY, index) {
     }
 }
 
-export { initialRender, draw, drawNoteTimingEffects, computeNoteYPosition };
+export { initialRender, draw, drawNoteTimingEffects, drawFlairEffects, computeNoteYPosition };
