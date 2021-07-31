@@ -10,9 +10,12 @@ const NOTE_TIMINGS = {
 const MAX_BEET_JUICE = 100;
 const MIN_BEET_JUICE = 0;
 const SMOOTHIE_TIME_THRESHOlD = 69;
+
+const SMOOTHIE_TIME_SCORE_MULTIPLIER = 8;
 let beetJuice = 50;
 let smoothieTime = false;
 
+let score = 0;
 
 const notes = [];
 const heldNotesHit = [];
@@ -86,4 +89,8 @@ function activateSmoothieTime() {
     smoothieTime = true;
 }
 
-export { notes, columns, song, heldNotesHit, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, NOTE_TIMINGS };
+function increaseScore(amount) {
+    score += amount;
+}
+
+export { notes, columns, song, heldNotesHit, score, increaseScore, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS };

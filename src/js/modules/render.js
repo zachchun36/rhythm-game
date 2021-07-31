@@ -73,6 +73,7 @@ function draw(timeStamp) {
     drawTimingBarPulse();
     drawHitNoteTexts();
     drawHitNoteCircles();
+    drawStatusBox();
 }
 
 function initialRender() {
@@ -173,6 +174,25 @@ function drawGradientForNoteScrollWindowKeyHold(
     );
 }
 
+function drawStatusBox() {
+
+    var grd = context.createLinearGradient(
+        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+        noteScrollWindowHeightPlusTimingBoxes,
+        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+        canvas.height
+    );
+    grd.addColorStop(0, "rgba(100, 100, 100, 0.5)");
+    grd.addColorStop(1, "rgba(0, 0, 0, 1");
+    context.fillStyle = grd;
+    context.fillRect(
+        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+        noteScrollWindowHeightPlusTimingBoxes - 1,
+        GameState.columns.length * columnWidth - 1 + PROGRESS_BAR_WIDTH * 2,
+        canvas.height - (noteScrollWindowHeightPlusTimingBoxes - 1),
+    )
+}
+
 function drawYellowGlow(opacity) {
     var grd = context.createLinearGradient(
         GameState.columns[0].xPosition,
@@ -202,10 +222,6 @@ function drawFlairGlowFade() {
         drawYellowGlow(flairOpacity);
         flairOpacity -= MAX_FLAIR_GLOW_OPACITY * FLAIR_FADE_RATE;
     }
-
-    // need to decrease flair opacity constantly
-    // need to keep /calling this flairGlow function
-    // call from the controller to trigger the opacity to be set to MAX_FLAIR_GLOW_OPACITY
 }
 
 function drawSmoothieTimeGlow() {

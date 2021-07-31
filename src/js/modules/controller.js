@@ -155,10 +155,14 @@ function keydownForIndex(index) {
                         GameState.heldNotesHit.push(currentNote);
                     }
                     GameState.changeBeetJuice(1);
+                    GameState.increaseScore(10);
+                    console.log(GameState.score);
                 } else if (timingDelta < 0.08) {
                     console.log("good note hit: " + i);
                     noteTiming = GameState.NOTE_TIMINGS.GOOD;
                     GameState.changeBeetJuice(.4);
+                    GameState.increaseScore(5);
+                    console.log(GameState.score);
                 } else if (timingDelta < 0.2) {
                     console.log("bad note hit :" + i);
                     noteTiming = GameState.NOTE_TIMINGS.BAD;
