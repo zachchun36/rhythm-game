@@ -1,7 +1,7 @@
 "use strict";
 
-import * as Render from "./render.js";
-import * as GameState from "./gameState.js";
+import * as Render from "./render";
+import * as GameState from "./gameState";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
