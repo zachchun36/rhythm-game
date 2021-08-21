@@ -24,37 +24,44 @@ const columns = [
     {
         color: "rgba(208, 17, 200, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(231, 189, 13, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(156, 223, 37, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(59, 174, 219, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(156, 223, 37, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(231, 189, 13, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     },
     {
         color: "rgba(208, 17, 200, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
+        xPosition: undefined
     }
 ];
 

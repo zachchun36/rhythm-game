@@ -127,11 +127,12 @@ function detectFlair(index) {
 }
 
 
-function keydownForIndex(index) {
+function keydownForIndex(index, event) {
     let currentTime = GameState.song.currentTime || 0.0;
     if (event.repeat) {
-        //no op for now
+        console.log('event.repeat');
     } else {
+        console.log('not event.repeat ')
         if (detectFlair(index)) {
             if (GameState.beetJuice >= GameState.SMOOTHIE_TIME_THRESHOlD) {
                 GameState.activateSmoothieTime();
@@ -156,15 +157,15 @@ function keydownForIndex(index) {
                     }
                     GameState.changeBeetJuice(1);
                     GameState.increaseScore(10);
-                    console.log(GameState.score);
+                    // console.log(GameState.score);
                 } else if (timingDelta < 0.08) {
-                    console.log("good note hit: " + i);
+                    // console.log("good note hit: " + i);
                     noteTiming = GameState.NOTE_TIMINGS.GOOD;
                     GameState.changeBeetJuice(.4);
                     GameState.increaseScore(5);
-                    console.log(GameState.score);
+                    // console.log(GameState.score);
                 } else if (timingDelta < 0.2) {
-                    console.log("bad note hit :" + i);
+                    // console.log("bad note hit :" + i);
                     noteTiming = GameState.NOTE_TIMINGS.BAD;
                     GameState.changeBeetJuice(-1);
                 }
@@ -200,7 +201,7 @@ function keydown(e) {
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
         GameState.columns[keyCodeIndex].keyDown = true;
-        keydownForIndex(keyCodeIndex);
+        keydownForIndex(keyCodeIndex, e);
     }
 }
 
