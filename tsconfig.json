@@ -2,8 +2,7 @@
     "compilerOptions": {
       "outDir": "./built",
       "allowJs": true,
-      "target": "es2015",
-      "module": "AMD"
+      "target": "es2015"
     },
     "include": ["./src/**/*"]
   }

@@ -1,6 +1,6 @@
 "use strict";
 
-import * as GameState from "./gameState";
+import * as GameState from "./gameState.js";
 
 var canvas;
 var context;

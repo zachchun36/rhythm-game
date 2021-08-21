@@ -1,6 +1,7 @@
-import * as Controller from "./modules/controller";
-import * as GameState from "./modules/gameState";
-import * as Render from "./modules/render";
+
+import * as Controller from "./modules/controller.js";
+import * as GameState from "./modules/gameState.js";
+import * as Render from "./modules/render.js";
 
 let playButton = document.querySelector("#play");
 playButton.addEventListener("click", function() {
