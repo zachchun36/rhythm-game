@@ -3,18 +3,18 @@ import * as Controller from "./modules/controller.js";
 import * as GameState from "./modules/gameState.js";
 import * as Render from "./modules/render.js";
 
-let playButton = document.querySelector("#play");
+let playButton = document.querySelector("#play")!;
 playButton.addEventListener("click", function() {
   GameState.song.play();
   GameState.song.volume = 0.1;
 });
 
-let muteButton = document.querySelector("#mute");
+let muteButton = document.querySelector("#mute")!;
 muteButton.addEventListener("click", function() {
   GameState.song.volume = 0.0;
 });
 
-let pauseButton = document.querySelector("#pause");
+let pauseButton = document.querySelector("#pause")!;
 pauseButton.addEventListener("click", function() {
   GameState.song.pause();
 });

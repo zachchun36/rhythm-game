@@ -2,6 +2,7 @@
 
 import * as Render from "./render.js";
 import * as GameState from "./gameState.js";
+import { Note, HeldNote, CompletedNote, Column, } from "./gameState.js";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -21,14 +22,14 @@ const KEY_CODES = [
     L_KEYCODE
 ];
 
-const sevenRecentKeyPresses = [];
+const sevenRecentKeyPresses: number[] = [];
 
 const FORWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => i);
 const BACKWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => KEYS.length - i - 1);
 console.log(FORWARDS_FLAIR);
 console.log(BACKWARDS_FLAIR);
 
-let mostRecentNoteIndex;
+let mostRecentNoteIndex: number;
 
 function start() {
     mostRecentNoteIndex = -1;
@@ -37,7 +38,7 @@ function start() {
     window.requestAnimationFrame(gameLoop);
 }
 
-function heldNoteActionsForIndex(index) {
+function heldNoteActionsForIndex(index: number) {
     let currentTime = GameState.song.currentTime || 0.0;
     let i = 0;
     while (i < GameState.heldNotesHit.length) {
@@ -57,7 +58,7 @@ function heldNoteActionsForIndex(index) {
     }
 }
 
-function gameLoop(timeStamp) {
+function gameLoop(timeStamp: number) {
     Render.draw(timeStamp);
 
     updateForMisses();
@@ -104,7 +105,7 @@ function updateForMisses() {
     }
 }
 
-function inputsMatchesFlair(idealFlair) {
+function inputsMatchesFlair(idealFlair: number[]) {
     for (let i = 0; i < sevenRecentKeyPresses.length; i++) {
         if (sevenRecentKeyPresses[i] !== idealFlair[i]) {
             return false;
@@ -113,7 +114,7 @@ function inputsMatchesFlair(idealFlair) {
     return true;
 }
 
-function detectFlair(index) {
+function detectFlair(index: number) {
     sevenRecentKeyPresses.push(index);
     
     if (sevenRecentKeyPresses.length > KEYS.length) {
@@ -127,7 +128,7 @@ function detectFlair(index) {
 }
 
 
-function keydownForIndex(index, event) {
+function keydownForIndex(index: number, event: KeyboardEvent) {
     let currentTime = GameState.song.currentTime || 0.0;
     if (event.repeat) {
         console.log('event.repeat');
@@ -144,15 +145,15 @@ function keydownForIndex(index, event) {
         }
         let i = getSafeStartingIndex();
         while (i < GameState.notes.length) {
-            let currentNote = GameState.notes[i];
-            if (currentNote.column === index && currentNote.hitY === -1) {
+            let currentNote: Note | HeldNote | CompletedNote = GameState.notes[i];
+            if (currentNote.column === index && !GameState.isCompletedNote(currentNote)) {
                 let timingDelta = Math.abs(currentTime - currentNote.time);
                 let noteTiming;
                 if (timingDelta < 0.05) {
                     // note was hit successfully
                     console.log("perfect note hit: " + i);
                     noteTiming = GameState.NOTE_TIMINGS.PERFECT;
-                    if (currentNote.endTime) {
+                    if (GameState.isHeldNote(currentNote)) {
                         GameState.heldNotesHit.push(currentNote);
                     }
                     GameState.changeBeetJuice(1);
@@ -171,10 +172,12 @@ function keydownForIndex(index, event) {
                 }
                 if (noteTiming) {
                     mostRecentNoteIndex = i;
-                    currentNote.hitY = Render.computeNoteYPosition(currentNote.time);
+                    let hitYPosition = Render.computeNoteYPosition(currentNote.time);
+                    let completedNote: CompletedNote = GameState.completeNote(currentNote, hitYPosition);
+                    GameState.notes[i] = completedNote;
                     Render.drawNoteTimingEffects(
                         noteTiming,
-                        currentNote.hitY,
+                        completedNote.hitY,
                         GameState.notes[i].column
                     );
                     break;
@@ -185,7 +188,7 @@ function keydownForIndex(index, event) {
     }
 }
 
-function releaseHeldNoteForIndex(index) {
+function releaseHeldNoteForIndex(index: number) {
     for (let i = 0; i < GameState.heldNotesHit.length; i++) {
         if (GameState.heldNotesHit[i].column === index) {
             GameState.columns[index].holdingDownNote = false;
@@ -196,7 +199,7 @@ function releaseHeldNoteForIndex(index) {
     }
 }
 
-function keydown(e) {
+function keydown(e: KeyboardEvent) {
     // console.log(e.keyCode);
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
@@ -205,7 +208,7 @@ function keydown(e) {
     }
 }
 
-function keyup(e) {
+function keyup(e: KeyboardEvent) {
     var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
         GameState.columns[keyCodeIndex].keyDown = false;
