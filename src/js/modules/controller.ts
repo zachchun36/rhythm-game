@@ -2,7 +2,7 @@
 
 import * as Render from "./render.js";
 import * as GameState from "./gameState.js";
-import { Note, HeldNote, CompletedNote, Column, } from "./gameState.js";
+import * as NoteTypes from "./Types/Note.js";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -24,8 +24,12 @@ const KEY_CODES = [
 
 const sevenRecentKeyPresses: number[] = [];
 
-const FORWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => i);
-const BACKWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => KEYS.length - i - 1);
+const FORWARDS_FLAIR = Array.from({
+    length: KEYS.length
+}, (x, i) => i);
+const BACKWARDS_FLAIR = Array.from({
+    length: KEYS.length
+}, (x, i) => KEYS.length - i - 1);
 
 const NO_HIT_Y = -1;
 
@@ -73,19 +77,19 @@ function gameLoop(timeStamp: number) {
     if (GameState.smoothieTime) {
         GameState.changeBeetJuice(-0.1);
     }
-    
+
     // Keep requesting new frames
     window.requestAnimationFrame(gameLoop);
 }
 
 function updateForMisses() {
-    var currentTime = GameState.song.currentTime || 0.0;
-    var i = getSafeStartingIndex();
+    let currentTime = GameState.song.currentTime || 0.0;
+    let i = getSafeStartingIndex();
     while (i < GameState.notes.length) {
-        var timePassedSinceNoteTime = currentTime - GameState.notes[i].time;
+        let timePassedSinceNoteTime = currentTime - GameState.notes[i].time;
         if (
             timePassedSinceNoteTime > 0.2 &&
-            !GameState.isCompletedNote(GameState.notes[i]) &&
+            !NoteTypes.isCompletedNote(GameState.notes[i]) &&
             !GameState.notes[i].missTriggered
         ) {
             // note was missed
@@ -116,7 +120,7 @@ function inputsMatchesFlair(idealFlair: number[]) {
 
 function detectFlair(index: number) {
     sevenRecentKeyPresses.push(index);
-    
+
     if (sevenRecentKeyPresses.length > KEYS.length) {
         sevenRecentKeyPresses.shift();
     }
@@ -139,49 +143,16 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
                 GameState.activateSmoothieTime();
                 console.log('smoothie time activated');
             }
-            GameState.changeBeetJuice(.7); 
+            GameState.changeBeetJuice(.7);
             Render.drawFlairEffects();
             console.log('flair party!');
         }
         let i = getSafeStartingIndex();
         while (i < GameState.notes.length) {
-            let currentNote: Note | HeldNote | CompletedNote = GameState.notes[i];
-            if (currentNote.column === index && !GameState.isCompletedNote(currentNote)) {
-                console.log("keydown for index at the right index and not completed")
-                let timingDelta = Math.abs(currentTime - currentNote.time);
-                let noteTiming;
-                if (timingDelta < 0.05) {
-                    // note was hit successfully
-                    console.log("perfect note hit: " + i);
-                    noteTiming = GameState.NOTE_TIMINGS.PERFECT;
-                    if (GameState.isHeldNote(currentNote)) {
-                        GameState.heldNotesHit.push(currentNote);
-                    }
-                    GameState.changeBeetJuice(1);
-                    GameState.increaseScore(10);
-                    // console.log(GameState.score);
-                } else if (timingDelta < 0.08) {
-                    // console.log("good note hit: " + i);
-                    noteTiming = GameState.NOTE_TIMINGS.GOOD;
-                    GameState.changeBeetJuice(.4);
-                    GameState.increaseScore(5);
-                    // console.log(GameState.score);
-                } else if (timingDelta < 0.2) {
-                    // console.log("bad note hit :" + i);
-                    noteTiming = GameState.NOTE_TIMINGS.BAD;
-                    GameState.changeBeetJuice(-1);
-                }
-                if (noteTiming) {
-                    mostRecentNoteIndex = i;
-                    let hitYPosition = Render.computeNoteYPosition(currentNote.time);
-                    let completedNote: CompletedNote = GameState.completeNote(currentNote, hitYPosition);
-                    completedNote.hitY = hitYPosition;
-                    GameState.notes[i] = completedNote;
-                    Render.drawNoteTimingEffects(
-                        noteTiming,
-                        hitYPosition,
-                        GameState.notes[i].column
-                    );
+            let currentNote: NoteTypes.Note | NoteTypes.HeldNote | NoteTypes.CompletedNote = GameState.notes[i];
+            if (currentNote.column === index && !NoteTypes.isCompletedNote(currentNote)) {
+                let noteHitByKeydown: boolean = processNoteHit(currentTime, currentNote, i);
+                if (noteHitByKeydown) {
                     break;
                 }
             }
@@ -190,6 +161,47 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
     }
 }
 
+function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: number): boolean {
+    let timingDelta = Math.abs(currentTime - currentNote.time);
+    let noteTiming;
+    if (timingDelta < 0.05) {
+        // note was hit successfully
+        console.log("perfect note hit: " + i);
+        noteTiming = GameState.NOTE_TIMINGS.PERFECT;
+        if (NoteTypes.isHeldNote(currentNote)) {
+            GameState.heldNotesHit.push(currentNote);
+        }
+        GameState.changeBeetJuice(1);
+        GameState.increaseScore(10);
+        // console.log(GameState.score);
+    } else if (timingDelta < 0.08) {
+        // console.log("good note hit: " + i);
+        noteTiming = GameState.NOTE_TIMINGS.GOOD;
+        GameState.changeBeetJuice(.4);
+        GameState.increaseScore(5);
+        // console.log(GameState.score);
+    } else if (timingDelta < 0.2) {
+        // console.log("bad note hit :" + i);
+        noteTiming = GameState.NOTE_TIMINGS.BAD;
+        GameState.changeBeetJuice(-1);
+    }
+    if (noteTiming) {
+        mostRecentNoteIndex = i;
+
+        let hitYPosition = Render.computeNoteYPosition(currentNote.time);
+        let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, hitYPosition);
+        GameState.notes[i] = completedNote;
+        Render.drawNoteTimingEffects(
+            noteTiming,
+            hitYPosition,
+            GameState.notes[i].column
+        );
+        return true;
+    }
+    return false;
+}
+
+// test comment
 function releaseHeldNoteForIndex(index: number) {
     for (let i = 0; i < GameState.heldNotesHit.length; i++) {
         if (GameState.heldNotesHit[i].column === index) {
@@ -203,7 +215,7 @@ function releaseHeldNoteForIndex(index: number) {
 
 function keydown(e: KeyboardEvent) {
     // console.log(e.keyCode);
-    var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
+    let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
         GameState.columns[keyCodeIndex].keyDown = true;
         keydownForIndex(keyCodeIndex, e);
@@ -211,14 +223,14 @@ function keydown(e: KeyboardEvent) {
 }
 
 function keyup(e: KeyboardEvent) {
-    var keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
+    let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
         GameState.columns[keyCodeIndex].keyDown = false;
     }
 }
 
 function getSafeStartingIndex() {
-    var i = mostRecentNoteIndex + 1;
+    let i = mostRecentNoteIndex + 1;
     // TODO Clean this logic up
     // right now we're subtracting 7 if we can just in case the player hits a note of a 7 note chord
     // that's at the highest index of the 7 notes.  We don't want to skip the hit detection logic
@@ -228,4 +240,6 @@ function getSafeStartingIndex() {
     i = i - 7 >= 0 ? i - 7 : 0;
     return i;
 }
-export { start };
+export {
+    start
+};

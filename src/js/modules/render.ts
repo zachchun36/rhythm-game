@@ -1,6 +1,7 @@
 "use strict";
 
 import * as GameState from "./gameState.js";
+import * as NoteTypes from "./Types/Note.js";
 
 let canvas: HTMLCanvasElement;
 let context: CanvasRenderingContext2D;
@@ -26,25 +27,59 @@ type HitNoteCircle = {
     radius: number
 }
 
+type Column = {
+    color: string,
+    xPosition: number
+}
 
-var columnFadeoutProgress = [0, 0, 0, 0, 0, 0, 0];
+const columns: Column[] = [{
+        color: "rgba(208, 17, 200, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(231, 189, 13, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(156, 223, 37, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(59, 174, 219, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(156, 223, 37, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(231, 189, 13, ",
+        xPosition: -1
+    },
+    {
+        color: "rgba(208, 17, 200, ",
+        xPosition: -1
+    }
+];
 
-var PULSE_DIRECTIONS = {
+const columnFadeoutProgress = [0, 0, 0, 0, 0, 0, 0];
+
+const PULSE_DIRECTIONS = {
     INCREASING: 0.5,
     DECREASING: -0.5
 };
 
-var hitNotePulse = {
+const hitNotePulse = {
     height: 0,
     direction: PULSE_DIRECTIONS.DECREASING
 };
-var NOTE_HEIGHT = 7;
-var COLUMN_WIDTH_RATIO = 1 / 10.0;
-var NOTE_SCROLL_WINDOW_HEIGHT_RATIO = 2.0 / 3.0;
+const NOTE_HEIGHT = 7;
+const COLUMN_WIDTH_RATIO = 1 / 10.0;
+const NOTE_SCROLL_WINDOW_HEIGHT_RATIO = 2.0 / 3.0;
 
-var GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
-var BAD_COLOR_RGB = "rgba(227, 91, 45, ";
-var MISS_COLOR_RGB = "rgba(227, 227, 227, ";
+const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
+const BAD_COLOR_RGB = "rgba(227, 91, 45, ";
+const MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 
 
 const PROGRESS_BAR_WIDTH = 3;
@@ -106,8 +141,8 @@ function initialRender() {
     context = tempContext;
 
     // Compute column x positions
-    for (var i = 0; i < GameState.columns.length; i++) {
-        GameState.columns[i].xPosition = 1.5 * columnWidth + columnWidth * i;
+    for (let i = 0; i < GameState.columns.length; i++) {
+        columns[i].xPosition = 1.5 * columnWidth + columnWidth * i;
     }
 }
 
@@ -138,7 +173,7 @@ function drawProgressBar(xPosition: number, progress: number, color: string) {
 
 function drawSongProgressBar() {
     let completionProgress = noteScrollWindowHeightPlusTimingBoxes * GameState.song.currentTime / GameState.song.duration;
-    drawProgressBar(GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+    drawProgressBar(columns[0].xPosition - PROGRESS_BAR_WIDTH,
         completionProgress,
         "#42a4f5"
     )
@@ -150,7 +185,7 @@ function drawGradientTimingBoxes(
     gradientColor2: string
 ) {
     // gradient dimensions is twice as big as the rectangle we draw since we dont wnat a full gradient to black / blue, we just want some partial shading
-    var grd = context.createLinearGradient(
+    let grd = context.createLinearGradient(
         0,
         noteScrollWindowHeight,
         0,
@@ -161,7 +196,7 @@ function drawGradientTimingBoxes(
     context.fillStyle = grd;
     // draw timing box
     context.fillRect(
-        GameState.columns[timingBoxIndex].xPosition,
+        columns[timingBoxIndex].xPosition,
         noteScrollWindowHeight,
         columnWidth - 1,
         columnWidth - 1
@@ -174,7 +209,7 @@ function drawGradientForNoteScrollWindowKeyHold(
     gradientColor2: string
 ) {
     // partial shading
-    var grd = context.createLinearGradient(
+    let grd = context.createLinearGradient(
         0,
         0,
         0,
@@ -185,7 +220,7 @@ function drawGradientForNoteScrollWindowKeyHold(
     context.fillStyle = grd;
     // width of full gradient effect
     context.fillRect(
-        GameState.columns[timingBoxIndex].xPosition +
+        columns[timingBoxIndex].xPosition +
         0.5 * columnFadeoutProgress[timingBoxIndex],
         0,
         columnWidth - 1 * columnFadeoutProgress[timingBoxIndex] - 1,
@@ -195,37 +230,37 @@ function drawGradientForNoteScrollWindowKeyHold(
 
 function drawStatusBox() {
 
-    var grd = context.createLinearGradient(
-        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+    let grd = context.createLinearGradient(
+        columns[0].xPosition - PROGRESS_BAR_WIDTH,
         noteScrollWindowHeightPlusTimingBoxes,
-        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+        columns[0].xPosition - PROGRESS_BAR_WIDTH,
         canvas.height
     );
     grd.addColorStop(0, "rgba(100, 100, 100, 0.5)");
     grd.addColorStop(1, "rgba(0, 0, 0, 1");
     context.fillStyle = grd;
     context.fillRect(
-        GameState.columns[0].xPosition - PROGRESS_BAR_WIDTH,
+        columns[0].xPosition - PROGRESS_BAR_WIDTH,
         noteScrollWindowHeightPlusTimingBoxes - 1,
-        GameState.columns.length * columnWidth - 1 + PROGRESS_BAR_WIDTH * 2,
+        columns.length * columnWidth - 1 + PROGRESS_BAR_WIDTH * 2,
         canvas.height - (noteScrollWindowHeightPlusTimingBoxes - 1),
     )
 }
 
 function drawYellowGlow(opacity: number) {
-    var grd = context.createLinearGradient(
-        GameState.columns[0].xPosition,
+    let grd = context.createLinearGradient(
+        columns[0].xPosition,
         -200, // arbitrary gradient
-        GameState.columns[0].xPosition,
+        columns[0].xPosition,
         1.3 * noteScrollWindowHeight
     );
     grd.addColorStop(0, "rgba(0, 0, 0, 0)");
     grd.addColorStop(1, "rgba(214, 185, 11, " + opacity);
     context.fillStyle = grd;
     context.fillRect(
-        GameState.columns[0].xPosition,
+        columns[0].xPosition,
         0,
-        columnWidth * GameState.columns.length - 1,
+        columnWidth * columns.length - 1,
         noteScrollWindowHeight
     );
 }
@@ -255,7 +290,7 @@ function drawSmoothieTimeGlow() {
 }
 
 function drawBeetJuiceBar() {
-    let endColumnsXPosition = GameState.columns.length * columnWidth + GameState.columns[0].xPosition - 1;
+    let endColumnsXPosition = columns.length * columnWidth + columns[0].xPosition - 1;
     let color;
     if (GameState.beetJuice >= GameState.SMOOTHIE_TIME_THRESHOlD && !GameState.smoothieTime) {
         color = "#ea3788"
@@ -275,8 +310,8 @@ function drawBeetJuiceBar() {
 }
 
 function computeNoteYPosition(noteTime: number) {
-    var currentTime = GameState.song.currentTime || 0.0;
-    var timeLeft = noteTime - GameState.song.currentTime;
+    let currentTime = GameState.song.currentTime || 0.0;
+    let timeLeft = noteTime - GameState.song.currentTime;
     // delete note / dont draw after its negative later
     return noteScrollWindowHeight - timeLeft * 300;
 }
@@ -304,12 +339,12 @@ function computeNoteTailXPosition(columnX: number) {
 }
 
 function drawHitTimingBoxes() {
-    for (var i = 0; i < GameState.columns.length; i++) {
+    for (let i = 0; i < columns.length; i++) {
         // hit timing boxes
-        var gradientColor = GameState.columns[i].keyDown ? "yellow" : "black";
+        let gradientColor = GameState.columns[i].keyDown ? "yellow" : "black";
         drawGradientTimingBoxes(
             i,
-            GameState.columns[i].color + " 1)",
+            columns[i].color + " 1)",
             gradientColor
         );
     }
@@ -319,9 +354,9 @@ function drawFakeHeldNotes() {
     for (let i = 0; i < GameState.columns.length; i++) {
         // fake notes for correctly held down notes
         if (GameState.columns[i].holdingDownNote) {
-            context.fillStyle = GameState.columns[i].color + " 1)";
+            context.fillStyle = columns[i].color + " 1)";
             context.fillRect(
-                GameState.columns[i].xPosition,
+                columns[i].xPosition,
                 noteScrollWindowHeight - NOTE_HEIGHT / 2.0,
                 columnWidth - 1,
                 NOTE_HEIGHT
@@ -331,14 +366,14 @@ function drawFakeHeldNotes() {
 }
 
 function drawHitNoteCircles() {
-    for (var i = 0; i < hitNoteCircles.length; i++) {
+    for (let i = 0; i < hitNoteCircles.length; i++) {
         // x, y, r,
         context.strokeStyle =
-            GameState.columns[hitNoteCircles[i].columnIndex].color + " 1)";
+            columns[hitNoteCircles[i].columnIndex].color + " 1)";
         context.lineWidth = 3;
         context.beginPath();
         context.arc(
-            GameState.columns[hitNoteCircles[i].columnIndex].xPosition +
+            columns[hitNoteCircles[i].columnIndex].xPosition +
             columnWidth / 2.0,
             hitNoteCircles[i].yHit,
             hitNoteCircles[i].radius,
@@ -355,13 +390,13 @@ function drawHitNoteCircles() {
 }
 
 function drawHitNoteTexts() {
-    for (var i = 0; i < hitNoteTexts.length; i++) {
-        var noteText = hitNoteTexts[i];
+    for (let i = 0; i < hitNoteTexts.length; i++) {
+        let noteText = hitNoteTexts[i];
         context.fillStyle = noteText.colorRGB + hitNoteTexts[i].opacity + ")";
         context.font = "8pt Monaco";
         context.fillText(
             noteText.text,
-            GameState.columns[noteText.columnIndex].xPosition,
+            columns[noteText.columnIndex].xPosition,
             noteScrollWindowHeight - noteText.yOffset * 2
         );
         noteText.yOffset += 0.5;
@@ -375,14 +410,14 @@ function drawHitNoteTexts() {
 
 function drawNotes() {
     // notes, to look into optimization methods
-    for (var i = 0; i < GameState.notes.length; i++) {
+    for (let i = 0; i < GameState.notes.length; i++) {
         let yPosition = computeNoteYPosition(GameState.notes[i].time);
-        if (!GameState.isCompletedNote(GameState.notes[i])) {
+        if (!NoteTypes.isCompletedNote(GameState.notes[i])) {
             if (yPosition >= 0 && yPosition <= noteScrollWindowHeight) {
                 context.fillStyle =
-                    GameState.columns[GameState.notes[i].column].color + " 1)";
+                    columns[GameState.notes[i].column].color + " 1)";
                 context.fillRect(
-                    GameState.columns[GameState.notes[i].column].xPosition,
+                    columns[GameState.notes[i].column].xPosition,
                     yPosition,
                     columnWidth - 1,
                     NOTE_HEIGHT
@@ -395,28 +430,28 @@ function drawNotes() {
 }
 
 function drawColumnsAndGradients() {
-    for (var i = 0; i < GameState.columns.length; i++) {
+    for (let i = 0; i < columns.length; i++) {
         context.fillStyle = "black";
         context.fillRect(
-            GameState.columns[i].xPosition,
+            columns[i].xPosition,
             0,
             columnWidth - 1,
             noteScrollWindowHeight
         );
         context.fillStyle = "rgba(128, 0, 0, 1)";
         context.fillRect(
-            GameState.columns[i].xPosition,
+            columns[i].xPosition,
             noteScrollWindowHeight - columnWidth / 25,
             columnWidth - 1,
             columnWidth / 25
         );
         // draw full gradient timing boxes
         // grdOpacity = speed of gradient transparency
-        var grdOpacity = 1 - columnFadeoutProgress[i] * 0.05;
-        var gradientColor =
-            columnFadeoutProgress[i] < columnWidth / 2
-                ? GameState.columns[i].color + grdOpacity
-                : "rgba(0, 0, 0, " + grdOpacity;
+        let grdOpacity = 1 - columnFadeoutProgress[i] * 0.05;
+        let gradientColor =
+            columnFadeoutProgress[i] < columnWidth / 2 ?
+            columns[i].color + grdOpacity :
+            "rgba(0, 0, 0, " + grdOpacity;
         if (GameState.columns[i].keyDown) {
             columnFadeoutProgress[i] = 0;
         }
@@ -432,15 +467,15 @@ function drawColumnsAndGradients() {
     }
 }
 
-function drawNoteTail(note: GameState.Note, yPosition: number) {
+function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
     if (
-        GameState.isHeldNote(note) &&
+        NoteTypes.isHeldNote(note) &&
         (GameState.columns[note.column].holdingDownNote ||
-            (!GameState.isCompletedNote(note) &&
+            (!NoteTypes.isCompletedNote(note) &&
                 GameState.song.currentTime < note.time + 0.2))
     ) {
         context.fillStyle =
-            GameState.columns[note.column].color + " 1)";
+            columns[note.column].color + " 1)";
         let endYPosition = computeNoteYPosition(note.endTime);
         let tailHeight = yPosition - endYPosition;
         if (tailHeight + endYPosition >= noteScrollWindowHeight) {
@@ -452,7 +487,7 @@ function drawNoteTail(note: GameState.Note, yPosition: number) {
         ) {
             context.fillRect(
                 computeNoteTailXPosition(
-                    GameState.columns[note.column].xPosition
+                    columns[note.column].xPosition
                 ),
                 endYPosition,
                 NOTE_HEIGHT,
@@ -470,9 +505,9 @@ function drawTimingBarPulse() {
         hitNotePulse.height = 0;
     }
     // pulse speed
-    var pulseDelta = hitNotePulse.direction * 2;
+    let pulseDelta = hitNotePulse.direction * 2;
     hitNotePulse.height += pulseDelta;
-    var grd = context.createLinearGradient(
+    let grd = context.createLinearGradient(
         0,
         noteScrollWindowHeight - hitNotePulse.height,
         0,
@@ -482,7 +517,7 @@ function drawTimingBarPulse() {
     grd.addColorStop(1, "rgba(72, 209, 204, 0.8)");
     context.fillStyle = grd;
     context.fillRect(
-        GameState.columns[0].xPosition,
+        columns[0].xPosition,
         noteScrollWindowHeight - hitNotePulse.height,
         columnWidth * 7 - 1,
         hitNotePulse.height + 1
@@ -490,16 +525,16 @@ function drawTimingBarPulse() {
 }
 
 function fixDPI() {
-    var dpi = window.devicePixelRatio;
+    let dpi = window.devicePixelRatio;
     console.log(dpi);
     //get CSS height
     //the + prefix casts it to an integer
     //the slice method gets rid of "px"
-    var styleHeight = +getComputedStyle(canvas)
+    let styleHeight = +getComputedStyle(canvas)
         .getPropertyValue("height")
         .slice(0, -2);
     //get CSS width
-    var styleWidth = +getComputedStyle(canvas)
+    let styleWidth = +getComputedStyle(canvas)
         .getPropertyValue("width")
         .slice(0, -2);
     //scale the canvas
@@ -529,4 +564,10 @@ function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) 
     }
 }
 
-export { initialRender, draw, drawNoteTimingEffects, drawFlairEffects, computeNoteYPosition };
+export {
+    initialRender,
+    draw,
+    drawNoteTimingEffects,
+    drawFlairEffects,
+    computeNoteYPosition
+};
