@@ -26,8 +26,8 @@ const sevenRecentKeyPresses: number[] = [];
 
 const FORWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => i);
 const BACKWARDS_FLAIR = Array.from({length: KEYS.length}, (x, i) => KEYS.length - i - 1);
-console.log(FORWARDS_FLAIR);
-console.log(BACKWARDS_FLAIR);
+
+const NO_HIT_Y = -1;
 
 let mostRecentNoteIndex: number;
 
@@ -85,7 +85,7 @@ function updateForMisses() {
         var timePassedSinceNoteTime = currentTime - GameState.notes[i].time;
         if (
             timePassedSinceNoteTime > 0.2 &&
-            GameState.notes[i].hitY === -1 &&
+            !GameState.isCompletedNote(GameState.notes[i]) &&
             !GameState.notes[i].missTriggered
         ) {
             // note was missed
@@ -95,7 +95,7 @@ function updateForMisses() {
             GameState.changeBeetJuice(-2);
             Render.drawNoteTimingEffects(
                 GameState.NOTE_TIMINGS.MISS,
-                null,
+                NO_HIT_Y,
                 GameState.notes[i].column
             );
         } else if (timePassedSinceNoteTime < 0) {
@@ -147,6 +147,7 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
         while (i < GameState.notes.length) {
             let currentNote: Note | HeldNote | CompletedNote = GameState.notes[i];
             if (currentNote.column === index && !GameState.isCompletedNote(currentNote)) {
+                console.log("keydown for index at the right index and not completed")
                 let timingDelta = Math.abs(currentTime - currentNote.time);
                 let noteTiming;
                 if (timingDelta < 0.05) {
@@ -174,10 +175,11 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
                     mostRecentNoteIndex = i;
                     let hitYPosition = Render.computeNoteYPosition(currentNote.time);
                     let completedNote: CompletedNote = GameState.completeNote(currentNote, hitYPosition);
+                    completedNote.hitY = hitYPosition;
                     GameState.notes[i] = completedNote;
                     Render.drawNoteTimingEffects(
                         noteTiming,
-                        completedNote.hitY,
+                        hitYPosition,
                         GameState.notes[i].column
                     );
                     break;

@@ -2,15 +2,30 @@
 
 import * as GameState from "./gameState.js";
 
-var canvas;
-var context;
-var columnWidth;
-var noteScrollWindowHeight;
-var secondsPassed;
-var oldTimeStamp;
-var fps;
-var hitNoteCircles = [];
-var hitNoteTexts = [];
+let canvas: HTMLCanvasElement;
+let context: CanvasRenderingContext2D;
+let columnWidth: number;
+let noteScrollWindowHeight: number;
+let secondsPassed;
+let oldTimeStamp: number;
+let fps;
+let hitNoteCircles: HitNoteCircle[] = [];
+let hitNoteTexts: HitNoteText[] = [];
+
+type HitNoteText = {
+    colorRGB: string,
+    text: string,
+    columnIndex: number,
+    yOffset: number,
+    opacity: number
+}
+
+type HitNoteCircle = {
+    columnIndex: number,
+    yHit: number,
+    radius: number
+}
+
 
 var columnFadeoutProgress = [0, 0, 0, 0, 0, 0, 0];
 
@@ -34,7 +49,7 @@ var MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 
 const PROGRESS_BAR_WIDTH = 3;
 
-let noteScrollWindowHeightPlusTimingBoxes;
+let noteScrollWindowHeightPlusTimingBoxes: number;
 
 
 let flairOpacity = 0;
@@ -44,7 +59,7 @@ const FLAIR_FADE_RATE = 1.0 / 50.0;
 let recentlyInSmoothieTime = true;
 
 
-function draw(timeStamp) {
+function draw(timeStamp: number) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "black";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -79,12 +94,16 @@ function draw(timeStamp) {
 function initialRender() {
     // Get a reference to the canvas
     console.log("hello");
-    canvas = document.getElementById("canvas");
+    canvas = document.getElementById("canvas") as HTMLCanvasElement;
     fixDPI();
     columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
     noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
     noteScrollWindowHeightPlusTimingBoxes = noteScrollWindowHeight + columnWidth - 1
-    context = canvas.getContext("2d");
+    let tempContext;
+    if (!(tempContext = canvas.getContext("2d"))) {
+        throw new Error(`2d context not supported or canvas already initialized`);
+    }
+    context = tempContext;
 
     // Compute column x positions
     for (var i = 0; i < GameState.columns.length; i++) {
@@ -92,7 +111,7 @@ function initialRender() {
     }
 }
 
-function drawProgressBar(xPosition, progress, color) {
+function drawProgressBar(xPosition: number, progress: number, color: string) {
     let grd = context.createLinearGradient(
         xPosition,
         0,
@@ -126,9 +145,9 @@ function drawSongProgressBar() {
 }
 
 function drawGradientTimingBoxes(
-    timingBoxIndex,
-    gradientColor1,
-    gradientColor2
+    timingBoxIndex: number,
+    gradientColor1: string,
+    gradientColor2: string
 ) {
     // gradient dimensions is twice as big as the rectangle we draw since we dont wnat a full gradient to black / blue, we just want some partial shading
     var grd = context.createLinearGradient(
@@ -150,9 +169,9 @@ function drawGradientTimingBoxes(
 }
 
 function drawGradientForNoteScrollWindowKeyHold(
-    timingBoxIndex,
-    gradientColor1,
-    gradientColor2
+    timingBoxIndex: number,
+    gradientColor1: string,
+    gradientColor2: string
 ) {
     // partial shading
     var grd = context.createLinearGradient(
@@ -193,7 +212,7 @@ function drawStatusBox() {
     )
 }
 
-function drawYellowGlow(opacity) {
+function drawYellowGlow(opacity: number) {
     var grd = context.createLinearGradient(
         GameState.columns[0].xPosition,
         -200, // arbitrary gradient
@@ -255,14 +274,14 @@ function drawBeetJuiceBar() {
     )
 }
 
-function computeNoteYPosition(noteTime) {
+function computeNoteYPosition(noteTime: number) {
     var currentTime = GameState.song.currentTime || 0.0;
     var timeLeft = noteTime - GameState.song.currentTime;
     // delete note / dont draw after its negative later
     return noteScrollWindowHeight - timeLeft * 300;
 }
 
-function createHitNoteTextObject(text, index, colorRGB) {
+function createHitNoteTextObject(text: string, index: number, colorRGB: string) {
     hitNoteTexts.push({
         colorRGB: colorRGB,
         text: text,
@@ -272,7 +291,7 @@ function createHitNoteTextObject(text, index, colorRGB) {
     });
 }
 
-function createHitNoteCircleObject(y, index) {
+function createHitNoteCircleObject(y: number, index: number) {
     hitNoteCircles.push({
         columnIndex: index,
         yHit: y,
@@ -280,7 +299,7 @@ function createHitNoteCircleObject(y, index) {
     });
 }
 
-function computeNoteTailXPosition(columnX) {
+function computeNoteTailXPosition(columnX: number) {
     return columnX + (columnWidth - 1) / 2.0 - NOTE_HEIGHT / 2.0;
 }
 
@@ -358,7 +377,7 @@ function drawNotes() {
     // notes, to look into optimization methods
     for (var i = 0; i < GameState.notes.length; i++) {
         let yPosition = computeNoteYPosition(GameState.notes[i].time);
-        if (GameState.notes[i].hitY === -1) {
+        if (!GameState.isCompletedNote(GameState.notes[i])) {
             if (yPosition >= 0 && yPosition <= noteScrollWindowHeight) {
                 context.fillStyle =
                     GameState.columns[GameState.notes[i].column].color + " 1)";
@@ -413,11 +432,11 @@ function drawColumnsAndGradients() {
     }
 }
 
-function drawNoteTail(note, yPosition) {
+function drawNoteTail(note: GameState.Note, yPosition: number) {
     if (
-        note.endTime &&
+        GameState.isHeldNote(note) &&
         (GameState.columns[note.column].holdingDownNote ||
-            (note.hitY === -1 &&
+            (!GameState.isCompletedNote(note) &&
                 GameState.song.currentTime < note.time + 0.2))
     ) {
         context.fillStyle =
@@ -485,12 +504,12 @@ function fixDPI() {
         .slice(0, -2);
     //scale the canvas
     console.log(canvas.height);
-    canvas.setAttribute("height", styleHeight * dpi);
-    canvas.setAttribute("width", styleWidth * dpi);
+    canvas.setAttribute("height", (styleHeight * dpi).toString());
+    canvas.setAttribute("width", (styleWidth * dpi).toString());
     console.log(canvas.height);
 }
 
-function drawNoteTimingEffects(noteTiming, hitY, index) {
+function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) {
     switch (noteTiming) {
         case GameState.NOTE_TIMINGS.PERFECT:
             createHitNoteTextObject("Perfect", index, GOOD_COLOR_RGB);

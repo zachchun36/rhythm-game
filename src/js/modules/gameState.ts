@@ -20,6 +20,7 @@ let score = 0;
 type Note = {
     time: number,
     column: number,
+    missTriggered: boolean
 }
 
 type CompletedNote = Note & {
@@ -38,7 +39,7 @@ type Column = {
 }
 
 
-const notes: Note[] | CompletedNote[] | HeldNote[] = [];
+const notes: (Note | CompletedNote | HeldNote)[] = [];
 const heldNotesHit: HeldNote[] = [];
 const song = new Audio("mp3s/snow-drop.mp3");
 const columns: Column[] = [
@@ -108,9 +109,9 @@ function getRandomInt(max: number) {
 for (var i = 0; i < 350; i++) {
     notes.push({
         time: i * 0.3 + 1,
-        // endTime: (i + 1) * 2 + 1,
+        endTime: i * 0.3 + 2,
         column: (i * 2) % columns.length,
-        hitY: -1
+        missTriggered: false
     });
 
 }
