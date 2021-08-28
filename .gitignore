@@ -4,5 +4,4 @@
 # Idea/IntelliJ
 .idea
 
-
-built/
+/built
