@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Render from "./render.js";
+import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
 
