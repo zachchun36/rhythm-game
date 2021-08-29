@@ -3,6 +3,8 @@
 import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
+import * as FlairGlow from "./Rendering/flairGlow.js";
+import * as Notes from "./Rendering/notes.js";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -144,7 +146,7 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
                 console.log('smoothie time activated');
             }
             GameState.changeBeetJuice(.7);
-            Render.drawFlairEffects();
+            FlairGlow.drawFlairEffects();
             console.log('flair party!');
         }
         let i = getSafeStartingIndex();
@@ -188,7 +190,7 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
     if (noteTiming) {
         mostRecentNoteIndex = i;
 
-        let hitYPosition = Render.computeNoteYPosition(currentNote.time);
+        let hitYPosition = Notes.computeNoteYPosition(currentNote.time);
         let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, hitYPosition);
         GameState.notes[i] = completedNote;
         Render.drawNoteTimingEffects(
