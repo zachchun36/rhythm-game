@@ -1,5 +1,11 @@
 "use strict";
 
+import {
+    Note,
+    HeldNote,
+    CompletedNote
+} from "./Types/Note.js";
+
 const NOTE_TIMINGS = {
     PERFECT: "PERFECT",
     GOOD: "GOOD",
@@ -17,64 +23,62 @@ let smoothieTime = false;
 
 let score = 0;
 
-const notes = [];
-const heldNotesHit = [];
+type ColumnState = {
+    keyDown: boolean,
+    holdingDownNote: boolean,
+}
+
+
+const notes: (Note | CompletedNote | HeldNote)[] = [];
+const heldNotesHit: HeldNote[] = [];
 const song = new Audio("mp3s/snow-drop.mp3");
-const columns = [
-    {
-        color: "rgba(208, 17, 200, ",
+const columns: ColumnState[] = [{
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(231, 189, 13, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(156, 223, 37, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(59, 174, 219, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(156, 223, 37, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(231, 189, 13, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     },
     {
-        color: "rgba(208, 17, 200, ",
         keyDown: false,
-        holdingDownNote: false
+        holdingDownNote: false,
     }
 ];
 
-function getRandomInt(max) {
+function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
 }
 
 // held note chords slow
-for (var i = 0; i < 350; i++) {
+for (let i = 0; i < 350; i++) {
     notes.push({
         time: i * 0.3 + 1,
-        // endTime: (i + 1) * 2 + 1,
+        endTime: i * 0.3 + 2,
         column: (i * 2) % columns.length,
-        hitY: -1
+        missTriggered: false
     });
 
 }
 
 
-function changeBeetJuice(amount) {
+function changeBeetJuice(amount: number) {
     beetJuice += amount;
     if (beetJuice > MAX_BEET_JUICE) {
         beetJuice = MAX_BEET_JUICE;
@@ -89,8 +93,23 @@ function activateSmoothieTime() {
     smoothieTime = true;
 }
 
-function increaseScore(amount) {
+function increaseScore(amount: number) {
     score += amount;
 }
 
-export { notes, columns, song, heldNotesHit, score, increaseScore, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS };
+export {
+    notes,
+    columns,
+    song,
+    heldNotesHit,
+    score,
+    increaseScore,
+    beetJuice,
+    changeBeetJuice,
+    activateSmoothieTime,
+    smoothieTime,
+    SMOOTHIE_TIME_THRESHOlD,
+    SMOOTHIE_TIME_SCORE_MULTIPLIER,
+    NOTE_TIMINGS,
+    ColumnState
+};

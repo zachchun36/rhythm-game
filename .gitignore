@@ -3,3 +3,7 @@
 
 # Idea/IntelliJ
 .idea
+
+/built
+
+.vscode/
