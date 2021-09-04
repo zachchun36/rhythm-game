@@ -8,6 +8,7 @@ import {
 
 const NOTE_TIMINGS = {
     PERFECT: "PERFECT",
+    GREAT: "GREAT",
     GOOD: "GOOD",
     BAD: "BAD",
     MISS: "MISS"
@@ -22,6 +23,7 @@ let beetJuice = 50;
 let smoothieTime = false;
 
 let score = 0;
+let combo = 0;
 
 type ColumnState = {
     keyDown: boolean,
@@ -69,8 +71,8 @@ function getRandomInt(max: number) {
 // held note chords slow
 for (let i = 0; i < 350; i++) {
     notes.push({
-        time: i * 0.3 + 1,
-        endTime: i * 0.3 + 2,
+        time: i * 0.3 + 1.015,
+        // endTime: i * 0.3 + 2,
         column: (i * 2) % columns.length,
         missTriggered: false
     });
@@ -86,17 +88,43 @@ function changeBeetJuice(amount: number) {
         beetJuice = MIN_BEET_JUICE;
         smoothieTime = false;
     }
-    console.log("beetJuice: " + beetJuice);
 }
 
 function activateSmoothieTime() {
     smoothieTime = true;
 }
 
+
+// uses score multiplier, doesn't add raw amount
 function increaseScore(amount: number) {
-    score += amount;
+    score += amount * getScoreMultiplier();
+
 }
 
+function getScoreMultiplier() {
+    if (smoothieTime) {
+        return 8;
+    }
+    if (combo < 10) {
+        return 1;
+    } else if (combo < 20) {
+        return 2;
+    } else if (combo < 30) {
+        return 3;
+    } else if (combo < 40) {
+        return 4;
+    } else {
+        return 5;
+    }
+}
+
+function incrementCombo() {
+    combo++;
+}
+
+function resetCombo() {
+    combo = 0;
+}
 export {
     notes,
     columns,
@@ -104,6 +132,10 @@ export {
     heldNotesHit,
     score,
     increaseScore,
+    getScoreMultiplier,
+    combo,
+    incrementCombo,
+    resetCombo,
     beetJuice,
     changeBeetJuice,
     activateSmoothieTime,
