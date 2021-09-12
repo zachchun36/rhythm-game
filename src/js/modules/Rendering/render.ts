@@ -2,15 +2,16 @@
 
 import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
-import * as HitNoteEffects from "./hitNoteEffects.js";
-import * as FlairGlow from "./flairGlow.js";
-import * as ProgressBar from "./progressBars.js";
-import * as Notes from "./notes.js";
 import * as FPS from "./fps.js";
-import * as TimingBarPulse from "./timingBarPulse.js";
-import * as FakeNotes from "./fakeNotes.js";
 import * as Columns from "./columns.js";
 import * as HitTimingBoxes from "./hitTimingBoxes.js";
+import * as ProgressBar from "./progressBars.js";
+import * as FlairGlow from "./flairGlow.js";
+import * as Notes from "./notes.js";
+import * as FakeNotes from "./fakeNotes.js";
+import * as HeldNotePulse from "./heldNotePulse.js";
+import * as TimingBarPulse from "./timingBarPulse.js";
+import * as HitNoteEffects from "./hitNoteEffects.js";
 import * as StatusBox from "./statusBox.js";
 
 // TODO refactor this out into hitNoteEffects.ts?
@@ -37,6 +38,7 @@ function draw(timeStamp: number) {
     FlairGlow.drawSmoothieTimeGlow();
     Notes.drawNotes();
     FakeNotes.drawFakeHeldNotes();
+    HeldNotePulse.drawHeldNodePulse();
     TimingBarPulse.drawTimingBarPulse();
     HitNoteEffects.drawHitNoteTexts();
     HitNoteEffects.drawHitNoteCircles();

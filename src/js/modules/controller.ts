@@ -5,6 +5,7 @@ import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
 import * as FlairGlow from "./Rendering/flairGlow.js";
 import * as Notes from "./Rendering/notes.js";
+import * as HeldPulse from "./Rendering/heldNotePulse.js"
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -166,27 +167,32 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
 function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: number): boolean {
     let timingDelta = Math.abs(currentTime - currentNote.time);
     let noteTiming;
-    if (timingDelta < 0.05) {
-        // note was hit successfully
-        console.log("perfect note hit: " + i);
-        noteTiming = GameState.NOTE_TIMINGS.PERFECT;
+    let changeScore = 0;
+    let changeBeet = 0;
+    
+    if (timingDelta < 0.2) {
+        noteTiming = GameState.NOTE_TIMINGS.BAD;
+        changeBeet = -1
         if (NoteTypes.isHeldNote(currentNote)) {
             GameState.heldNotesHit.push(currentNote);
+            HeldPulse.startHeldNotePulse(currentNote.column)
         }
-        GameState.changeBeetJuice(1);
-        GameState.increaseScore(10);
-        // console.log(GameState.score);
-    } else if (timingDelta < 0.08) {
-        // console.log("good note hit: " + i);
-        noteTiming = GameState.NOTE_TIMINGS.GOOD;
-        GameState.changeBeetJuice(.4);
-        GameState.increaseScore(5);
-        // console.log(GameState.score);
-    } else if (timingDelta < 0.2) {
-        // console.log("bad note hit :" + i);
-        noteTiming = GameState.NOTE_TIMINGS.BAD;
-        GameState.changeBeetJuice(-1);
     }
+    if (timingDelta < 0.08) {
+        noteTiming = GameState.NOTE_TIMINGS.GOOD;
+        changeBeet = 0.4;
+        changeScore = 5;
+    }
+    if (timingDelta < 0.05) {
+        noteTiming = GameState.NOTE_TIMINGS.PERFECT;
+        changeBeet = 1;
+        changeScore = 10;
+    }
+
+    GameState.changeBeetJuice(changeBeet);
+    GameState.increaseScore(changeScore);
+    // console.log(GameState.score);
+
     if (noteTiming) {
         mostRecentNoteIndex = i;
 
@@ -210,6 +216,7 @@ function releaseHeldNoteForIndex(index: number) {
             GameState.columns[index].holdingDownNote = false;
             console.log("column released for index: " + index);
             GameState.heldNotesHit.splice(i, 1);
+            HeldPulse.stopHeldNotePulse(i);
             i--;
         }
     }

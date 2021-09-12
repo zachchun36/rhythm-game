@@ -51,6 +51,7 @@ function drawHitNoteCircles() {
             2 * Math.PI
         );
         Init.context.stroke();
+        // Increase circule radius
         hitNoteCircles[i].radius += 1;
         if (hitNoteCircles[i].radius > Init.columnWidth / 2.0) {
             hitNoteCircles.splice(i, 1);
