@@ -7,6 +7,8 @@ const FLAIR_FADE_RATE = 1.0 / 50.0;
 let flairOpacity = 0;
 let recentlyInSmoothieTime = true;
 
+let mostRecentFlairCount = GameState.flairCount;
+
 function drawYellowGlow(opacity: number) {
     let grd = Init.context.createLinearGradient(
         Init.columns[0].xPosition,
@@ -25,13 +27,15 @@ function drawYellowGlow(opacity: number) {
     );
 }
 
-function drawFlairEffects() {
-    if (!GameState.smoothieTime) {
-        flairOpacity = MAX_FLAIR_GLOW_OPACITY;
-    }
-}
-
 function drawFlairGlowFade() {
+    if (mostRecentFlairCount < GameState.flairCount) {
+        mostRecentFlairCount = GameState.flairCount;
+        // start new flair glow but only if not in smoothie time
+        if (!GameState.smoothieTime) {
+            flairOpacity = MAX_FLAIR_GLOW_OPACITY;
+        }
+    }
+
     if (flairOpacity >= 0) {
         drawYellowGlow(flairOpacity);
         flairOpacity -= MAX_FLAIR_GLOW_OPACITY * FLAIR_FADE_RATE;
@@ -50,7 +54,6 @@ function drawSmoothieTimeGlow() {
 }
 
 export {
-    drawFlairEffects,
     drawFlairGlowFade,
     drawSmoothieTimeGlow
 }

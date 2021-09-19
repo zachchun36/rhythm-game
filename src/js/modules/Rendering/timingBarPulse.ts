@@ -40,6 +40,7 @@ function drawTimingBarPulse() {
 function startPulse() {
     hitNotePulse.direction = PULSE_DIRECTIONS.INCREASING;
 }
+
 export {
     startPulse,
     drawTimingBarPulse

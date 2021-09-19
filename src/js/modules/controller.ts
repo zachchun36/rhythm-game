@@ -3,7 +3,6 @@
 import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
-import * as FlairGlow from "./Rendering/flairGlow.js";
 import * as Notes from "./Rendering/notes.js";
 
 const S_KEYCODE = 83;
@@ -147,7 +146,7 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
                 console.log('smoothie time activated');
             }
             GameState.changeBeetJuice(.7);
-            FlairGlow.drawFlairEffects();
+            GameState.incrementFlair();
             console.log('flair party!');
         }
         let i = getSafeStartingIndex();
@@ -167,54 +166,48 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
 function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: number): boolean {
     let timingDelta = Math.abs(currentTime - currentNote.time);
     let noteTiming;
-    if (timingDelta < 0.05) {
-        // note was hit successfully
-        console.log("perfect note hit: " + i);
-        noteTiming = GameState.NOTE_TIMINGS.PERFECT;
+    let changeScore = 0;
+    let changeBeet = 0;
+    const GOOD_TIMING_THRESHOLD = 0.14;
+
+    if (timingDelta < GOOD_TIMING_THRESHOLD) {
+        GameState.incrementCombo();
         if (NoteTypes.isHeldNote(currentNote)) {
             GameState.heldNotesHit.push(currentNote);
         }
-        GameState.changeBeetJuice(1);
-
-        GameState.incrementCombo();
-        GameState.increaseScore(100);
-        console.log(GameState.score);
-    } else if (timingDelta < 0.08) {
-        // console.log("good note hit: " + i);
-        noteTiming = GameState.NOTE_TIMINGS.GREAT;
-        GameState.changeBeetJuice(.6);
-        GameState.incrementCombo();
-        
-        GameState.increaseScore(75);
-
-        console.log(GameState.score);
-
-    } else if (timingDelta < 0.14) {
-        // console.log("good note hit: " + i);
-        noteTiming = GameState.NOTE_TIMINGS.GOOD;
-        GameState.changeBeetJuice(.2);
-        GameState.incrementCombo();
-
-        GameState.increaseScore(50);
-        console.log(GameState.score);
-    } else if (timingDelta < 0.2) {
-        // console.log("bad note hit :" + i);
-        noteTiming = GameState.NOTE_TIMINGS.BAD;
-        GameState.changeBeetJuice(-1);
+        if (timingDelta < 0.05) {
+            noteTiming = GameState.NOTE_TIMINGS.PERFECT;
+            changeBeet = 1;
+            changeScore = 100;
+        } else if (timingDelta < 0.08) {
+            noteTiming = GameState.NOTE_TIMINGS.GREAT;
+            changeBeet = .6;
+            changeScore = 75;
+        } else {
+            noteTiming = GameState.NOTE_TIMINGS.GOOD;
+            changeBeet = .2;
+            changeScore = 50;
+        } 
+    }else if (timingDelta < 0.2) {
         GameState.resetCombo();
-
-        GameState.increaseScore(25);
-        console.log(GameState.score);
+        noteTiming = GameState.NOTE_TIMINGS.BAD;
+        changeBeet = -1;
+        changeScore = 25;
     }
+
+    GameState.changeBeetJuice(changeBeet);
+    GameState.increaseScore(changeScore);
+
+
     if (noteTiming) {
         mostRecentNoteIndex = i;
 
-        let hitYPosition = Notes.computeNoteYPosition(currentNote.time);
-        let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, hitYPosition);
+        let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, noteTiming);
         GameState.notes[i] = completedNote;
+
         Render.drawNoteTimingEffects(
             noteTiming,
-            hitYPosition,
+            currentNote.time,
             GameState.notes[i].column
         );
         return true;

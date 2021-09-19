@@ -2,15 +2,16 @@
 
 import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
-import * as HitNoteEffects from "./hitNoteEffects.js";
-import * as FlairGlow from "./flairGlow.js";
-import * as ProgressBar from "./progressBars.js";
-import * as Notes from "./notes.js";
 import * as FPS from "./fps.js";
-import * as TimingBarPulse from "./timingBarPulse.js";
-import * as FakeNotes from "./fakeNotes.js";
 import * as Columns from "./columns.js";
 import * as HitTimingBoxes from "./hitTimingBoxes.js";
+import * as ProgressBar from "./progressBars.js";
+import * as FlairGlow from "./flairGlow.js";
+import * as Notes from "./notes.js";
+import * as FakeNotes from "./fakeNotes.js";
+import * as HeldNotePulse from "./heldNotePulse.js";
+import * as TimingBarPulse from "./timingBarPulse.js";
+import * as HitNoteEffects from "./hitNoteEffects.js";
 import * as StatusBox from "./statusBox.js";
 import * as ScoreMultiplier from "./scoreMultiplier.js";
 
@@ -38,6 +39,7 @@ function draw(timeStamp: number) {
     FlairGlow.drawSmoothieTimeGlow();
     Notes.drawNotes();
     FakeNotes.drawFakeHeldNotes();
+    HeldNotePulse.drawHeldNodePulse();
     TimingBarPulse.drawTimingBarPulse();
     HitNoteEffects.drawHitNoteTexts();
     HitNoteEffects.drawHitNoteCircles();
@@ -45,8 +47,9 @@ function draw(timeStamp: number) {
     ScoreMultiplier.drawScoreMultiplier();
 }
 
-function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) {
-    switch (noteTiming) {
+function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, index: number) {
+    let hitY = Notes.computeNoteYPosition(rawNoteTime);
+    switch (noteTimingGrade) {
         case GameState.NOTE_TIMINGS.PERFECT:
             HitNoteEffects.createHitNoteTextObject("Perfect", index, GOOD_COLOR_RGB);
             HitNoteEffects.createHitNoteCircleObject(hitY, index);

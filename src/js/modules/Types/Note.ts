@@ -5,7 +5,7 @@ type Note = {
 }
 
 type CompletedNote = Note & {
-    hitY: number
+    noteTiming: string
 }
 
 type HeldNote = Note & {
@@ -17,12 +17,12 @@ function isHeldNote(note: Note | HeldNote): note is HeldNote {
 }
 
 function isCompletedNote(note: Note | CompletedNote): note is CompletedNote {
-    return (note as CompletedNote).hitY !== undefined;
+    return (note as CompletedNote).noteTiming !== undefined;
 }
 
-function completeNote(note: Note, hitY: number): CompletedNote {
+function completeNote(note: Note, noteTiming: string): CompletedNote {
     return Object.assign(note, {
-        hitY: hitY
+        noteTiming: noteTiming
     });
 }
 
