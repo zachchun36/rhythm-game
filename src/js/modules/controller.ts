@@ -3,9 +3,7 @@
 import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
-import * as FlairGlow from "./Rendering/flairGlow.js";
 import * as Notes from "./Rendering/notes.js";
-import * as HeldPulse from "./Rendering/heldNotePulse.js"
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -147,7 +145,7 @@ function keydownForIndex(index: number, event: KeyboardEvent) {
                 console.log('smoothie time activated');
             }
             GameState.changeBeetJuice(.7);
-            FlairGlow.drawFlairEffects();
+            GameState.incrementFlair();
             console.log('flair party!');
         }
         let i = getSafeStartingIndex();
@@ -175,7 +173,6 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
         changeBeet = -1
         if (NoteTypes.isHeldNote(currentNote)) {
             GameState.heldNotesHit.push(currentNote);
-            HeldPulse.startHeldNotePulse(currentNote.column)
         }
     }
     if (timingDelta < 0.08) {
@@ -196,12 +193,12 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
     if (noteTiming) {
         mostRecentNoteIndex = i;
 
-        let hitYPosition = Notes.computeNoteYPosition(currentNote.time);
-        let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, hitYPosition);
+        let completedNote: NoteTypes.CompletedNote = NoteTypes.completeNote(currentNote, noteTiming);
         GameState.notes[i] = completedNote;
+
         Render.drawNoteTimingEffects(
             noteTiming,
-            hitYPosition,
+            currentNote.time,
             GameState.notes[i].column
         );
         return true;
@@ -216,7 +213,6 @@ function releaseHeldNoteForIndex(index: number) {
             GameState.columns[index].holdingDownNote = false;
             console.log("column released for index: " + index);
             GameState.heldNotesHit.splice(i, 1);
-            HeldPulse.stopHeldNotePulse(i);
             i--;
         }
     }

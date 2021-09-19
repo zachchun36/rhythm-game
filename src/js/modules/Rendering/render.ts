@@ -45,8 +45,9 @@ function draw(timeStamp: number) {
     StatusBox.drawStatusBox();
 }
 
-function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) {
-    switch (noteTiming) {
+function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, index: number) {
+    let hitY = Notes.computeNoteYPosition(rawNoteTime);
+    switch (noteTimingGrade) {
         case GameState.NOTE_TIMINGS.PERFECT:
             HitNoteEffects.createHitNoteTextObject("Perfect", index, GOOD_COLOR_RGB);
             HitNoteEffects.createHitNoteCircleObject(hitY, index);

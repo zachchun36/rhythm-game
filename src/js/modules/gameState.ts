@@ -20,6 +20,7 @@ const SMOOTHIE_TIME_THRESHOlD = 69;
 const SMOOTHIE_TIME_SCORE_MULTIPLIER = 8;
 let beetJuice = 70;
 let smoothieTime = false;
+let flairCount = 0;
 
 let score = 0;
 
@@ -71,7 +72,7 @@ for (let i = 0; i < 350; i++) {
     notes.push({
         time: i * 0.3 + 1,
         endTime: i * 0.3 + 3,
-        column: (i * 2) % columns.length,
+        column: i % columns.length,
         missTriggered: false
     });
 
@@ -97,6 +98,10 @@ function increaseScore(amount: number) {
     score += amount;
 }
 
+function incrementFlair() {
+    flairCount++;
+}
+
 export {
     notes,
     columns,
@@ -104,6 +109,8 @@ export {
     heldNotesHit,
     score,
     increaseScore,
+    flairCount,
+    incrementFlair,
     beetJuice,
     changeBeetJuice,
     activateSmoothieTime,

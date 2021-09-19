@@ -1,6 +1,7 @@
 import * as GameState from "../gameState.js"
 import * as Init from "./init.js";
 import * as Notes from "./notes.js";
+import * as NoteTypes from "../Types/Note.js";
 
 const PULSE_DIRECTIONS = {
     INCREASING: 0.4,
@@ -51,6 +52,8 @@ const HeldNotePulseInfo: HeldNotePulse[] = [
     }
 ];
 
+const activeHeldNotesHit: Set<NoteTypes.HeldNote> = new Set();
+
 function startHeldNotePulse(
     columnIndex: number
 ){
@@ -68,6 +71,21 @@ function stopHeldNotePulse(
 }
 
 function drawHeldNodePulse() {
+    for (let i = 0; i < GameState.heldNotesHit.length; i++) {
+        if (!activeHeldNotesHit.has(GameState.heldNotesHit[i])) {
+            activeHeldNotesHit.add(GameState.heldNotesHit[i]);
+            startHeldNotePulse(GameState.heldNotesHit[i].column);
+        } 
+    }
+
+    activeHeldNotesHit.forEach(function (note: NoteTypes.HeldNote) {
+        if (GameState.heldNotesHit.indexOf(note) === -1) {
+            activeHeldNotesHit.delete(note);
+            stopHeldNotePulse(note.column);
+        }
+    })
+
+
     for (let i = 0; i < Init.columns.length; i++) {
         if (HeldNotePulseInfo[i].width >= 0.35 * Init.columnWidth) {
             HeldNotePulseInfo[i].direction = PULSE_DIRECTIONS.DECREASING;
