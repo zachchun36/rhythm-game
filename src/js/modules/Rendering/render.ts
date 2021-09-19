@@ -12,6 +12,7 @@ import * as FakeNotes from "./fakeNotes.js";
 import * as Columns from "./columns.js";
 import * as HitTimingBoxes from "./hitTimingBoxes.js";
 import * as StatusBox from "./statusBox.js";
+import * as ScoreMultiplier from "./scoreMultiplier.js";
 
 // TODO refactor this out into hitNoteEffects.ts?
 const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
@@ -41,6 +42,7 @@ function draw(timeStamp: number) {
     HitNoteEffects.drawHitNoteTexts();
     HitNoteEffects.drawHitNoteCircles();
     StatusBox.drawStatusBox();
+    ScoreMultiplier.drawScoreMultiplier();
 }
 
 function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) {
@@ -50,6 +52,11 @@ function drawNoteTimingEffects(noteTiming: string, hitY: number, index: number) 
             HitNoteEffects.createHitNoteCircleObject(hitY, index);
             TimingBarPulse.startPulse();
             break;
+        case GameState.NOTE_TIMINGS.GREAT:
+            HitNoteEffects.createHitNoteTextObject("Great", index, GOOD_COLOR_RGB);
+            HitNoteEffects.createHitNoteCircleObject(hitY, index);
+            TimingBarPulse.startPulse();
+            break;            
         case GameState.NOTE_TIMINGS.GOOD:
             HitNoteEffects.createHitNoteTextObject(" Good", index, GOOD_COLOR_RGB);
             HitNoteEffects.createHitNoteCircleObject(hitY, index);

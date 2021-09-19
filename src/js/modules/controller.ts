@@ -98,6 +98,7 @@ function updateForMisses() {
             mostRecentNoteIndex = i;
             console.log("note missed: " + i);
             GameState.notes[i].missTriggered = true;
+            GameState.resetCombo();
             GameState.changeBeetJuice(-2);
             Render.drawNoteTimingEffects(
                 GameState.NOTE_TIMINGS.MISS,
@@ -174,18 +175,36 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
             GameState.heldNotesHit.push(currentNote);
         }
         GameState.changeBeetJuice(1);
-        GameState.increaseScore(10);
-        // console.log(GameState.score);
+
+        GameState.incrementCombo();
+        GameState.increaseScore(100);
+        console.log(GameState.score);
     } else if (timingDelta < 0.08) {
         // console.log("good note hit: " + i);
+        noteTiming = GameState.NOTE_TIMINGS.GREAT;
+        GameState.changeBeetJuice(.6);
+        GameState.incrementCombo();
+        
+        GameState.increaseScore(75);
+
+        console.log(GameState.score);
+
+    } else if (timingDelta < 0.14) {
+        // console.log("good note hit: " + i);
         noteTiming = GameState.NOTE_TIMINGS.GOOD;
-        GameState.changeBeetJuice(.4);
-        GameState.increaseScore(5);
-        // console.log(GameState.score);
+        GameState.changeBeetJuice(.2);
+        GameState.incrementCombo();
+
+        GameState.increaseScore(50);
+        console.log(GameState.score);
     } else if (timingDelta < 0.2) {
         // console.log("bad note hit :" + i);
         noteTiming = GameState.NOTE_TIMINGS.BAD;
         GameState.changeBeetJuice(-1);
+        GameState.resetCombo();
+
+        GameState.increaseScore(25);
+        console.log(GameState.score);
     }
     if (noteTiming) {
         mostRecentNoteIndex = i;
