@@ -5,5 +5,5 @@
       "target": "es2015",
       "strict": true
     },
-    "include": ["./src/**/*"]
+    "include": ["./js"]
   }

@@ -1,6 +1,6 @@
-import * as Init from "./init.js.js"
-import * as GameState from "../gameState.js.js";
-import * as ProgressBar from "./progressBars.js.js";
+import * as Init from "./init.js"
+import * as GameState from "../gameState.js";
+import * as ProgressBar from "./progressBars.js";
 
 const FONT_HEIGHT = 32;
 

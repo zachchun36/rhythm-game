@@ -1,6 +1,6 @@
-import * as GameState from "../gameState.js.js";
-import * as Init from "./init.js.js";
-import * as Notes from "./notes.js.js";
+import * as GameState from "../gameState.js";
+import * as Init from "./init.js";
+import * as Notes from "./notes.js";
 
 function drawFakeHeldNotes() {
     for (let i = 0; i < GameState.columns.length; i++) {

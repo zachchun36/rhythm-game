@@ -1,5 +1,5 @@
-import * as Init from "./init.js.js"
-import * as GameState from "../gameState.js.js";
+import * as Init from "./init.js"
+import * as GameState from "../gameState.js";
 
 const PROGRESS_BAR_WIDTH = 3;
 

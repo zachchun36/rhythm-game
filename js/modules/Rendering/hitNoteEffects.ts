@@ -1,7 +1,7 @@
 let hitNoteCircles: HitNoteCircle[] = [];
 let hitNoteTexts: HitNoteText[] = [];
 
-import * as Init from "./init.js.js"
+import * as Init from "./init.js"
 
 type HitNoteText = {
     colorRGB: string,

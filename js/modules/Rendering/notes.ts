@@ -1,6 +1,6 @@
-import * as GameState from "../gameState.js.js";
-import * as Init from "./init.js.js";
-import * as NoteTypes from "../Types/Note.js.js";
+import * as GameState from "../gameState.js";
+import * as Init from "./init.js";
+import * as NoteTypes from "../Types/Note.js";
 
 const NOTE_HEIGHT = 7;
 

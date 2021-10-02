@@ -1,4 +1,4 @@
-import * as Init from "./init.js.js";
+import * as Init from "./init.js";
 
 const PULSE_DIRECTIONS = {
     INCREASING: 0.5,

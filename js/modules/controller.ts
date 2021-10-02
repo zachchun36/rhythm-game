@@ -1,9 +1,9 @@
 "use strict";
 
-import * as Render from "./Rendering/render.js.js";
-import * as GameState from "./gameState.js.js";
-import * as NoteTypes from "./Types/Note.js.js";
-import * as Notes from "./Rendering/notes.js.js";
+import * as Render from "./Rendering/render.js";
+import * as GameState from "./gameState.js";
+import * as NoteTypes from "./Types/Note.js";
+import * as Notes from "./Rendering/notes.js";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;

@@ -4,7 +4,7 @@ import {
     Note,
     HeldNote,
     CompletedNote
-} from "./Types/Note.js.js";
+} from "./Types/Note.js";
 
 const NOTE_TIMINGS = {
     PERFECT: "PERFECT",

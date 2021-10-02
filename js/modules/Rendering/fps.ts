@@ -1,4 +1,4 @@
-import * as Init from "./init.js.js";
+import * as Init from "./init.js";
 
 let secondsPassed;
 let oldTimeStamp: number;
