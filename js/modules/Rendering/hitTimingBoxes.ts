@@ -1,5 +1,5 @@
-import * as GameState from "../gameState.js";
-import * as Init from "./init.js";
+import * as GameState from "../gameState.js.js";
+import * as Init from "./init.js.js";
 
 
 function drawHitTimingBoxes() {

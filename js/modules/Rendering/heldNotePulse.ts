@@ -1,7 +1,7 @@
-import * as GameState from "../gameState.js"
-import * as Init from "./init.js";
-import * as Notes from "./notes.js";
-import * as NoteTypes from "../Types/Note.js";
+import * as GameState from "../gameState.js.js"
+import * as Init from "./init.js.js";
+import * as Notes from "./notes.js.js";
+import * as NoteTypes from "../Types/Note.js.js";
 
 const PULSE_DIRECTIONS = {
     INCREASING: 0.4,

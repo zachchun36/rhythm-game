@@ -1,5 +1,5 @@
-import * as Init from "./init.js";
-import * as ProgressBar from "./progressBars.js";
+import * as Init from "./init.js.js";
+import * as ProgressBar from "./progressBars.js.js";
 
 function drawStatusBox() {
     let grd = Init.context.createLinearGradient(

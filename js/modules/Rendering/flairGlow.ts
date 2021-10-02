@@ -1,5 +1,5 @@
-import * as Init from "./init.js"
-import * as GameState from "../gameState.js";
+import * as Init from "./init.js.js"
+import * as GameState from "../gameState.js.js";
 
 const MAX_FLAIR_GLOW_OPACITY = 0.5;
 const FLAIR_FADE_RATE = 1.0 / 50.0;

@@ -1,5 +1,4 @@
 "use strict";
-
 import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
 import * as FPS from "./fps.js";
@@ -14,23 +13,16 @@ import * as TimingBarPulse from "./timingBarPulse.js";
 import * as HitNoteEffects from "./hitNoteEffects.js";
 import * as StatusBox from "./statusBox.js";
 import * as ScoreMultiplier from "./scoreMultiplier.js";
-
 // TODO refactor this out into hitNoteEffects.ts?
 const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
 const BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 const MISS_COLOR_RGB = "rgba(227, 227, 227, ";
-
-function draw(timeStamp: number) {
+function draw(timeStamp) {
     Init.context.clearRect(0, 0, Init.canvas.width, Init.canvas.height);
     Init.context.fillStyle = "black";
     Init.context.fillRect(0, 0, Init.canvas.width, Init.canvas.height);
     FPS.update(timeStamp);
-    Init.context.clearRect(
-        1.5 * Init.columnWidth,
-        0,
-        7 * Init.columnWidth - 1,
-        Init.noteScrollWindowHeight + Init.columnWidth - 1
-    );
+    Init.context.clearRect(1.5 * Init.columnWidth, 0, 7 * Init.columnWidth - 1, Init.noteScrollWindowHeight + Init.columnWidth - 1);
     Columns.drawColumnsAndGradients();
     HitTimingBoxes.drawHitTimingBoxes();
     ProgressBar.drawBeetJuiceBar();
@@ -46,8 +38,7 @@ function draw(timeStamp: number) {
     StatusBox.drawStatusBox();
     ScoreMultiplier.drawScoreMultiplier();
 }
-
-function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, index: number) {
+function drawNoteTimingEffects(noteTimingGrade, rawNoteTime, index) {
     let hitY = Notes.computeNoteYPosition(rawNoteTime);
     switch (noteTimingGrade) {
         case GameState.NOTE_TIMINGS.PERFECT:
@@ -59,7 +50,7 @@ function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, ind
             HitNoteEffects.createHitNoteTextObject("Great", index, GOOD_COLOR_RGB);
             HitNoteEffects.createHitNoteCircleObject(hitY, index);
             TimingBarPulse.startPulse();
-            break;            
+            break;
         case GameState.NOTE_TIMINGS.GOOD:
             HitNoteEffects.createHitNoteTextObject(" Good", index, GOOD_COLOR_RGB);
             HitNoteEffects.createHitNoteCircleObject(hitY, index);
@@ -72,8 +63,4 @@ function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, ind
             HitNoteEffects.createHitNoteTextObject(" Miss", index, MISS_COLOR_RGB);
     }
 }
-
-export {
-    draw,
-    drawNoteTimingEffects
-};
+export { draw, drawNoteTimingEffects };
