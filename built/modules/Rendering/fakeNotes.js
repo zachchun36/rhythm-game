@@ -6,7 +6,7 @@ function drawFakeHeldNotes() {
         // fake notes for correctly held down notes
         if (GameState.columns[i].holdingDownNote) {
             Init.context.fillStyle = Init.columns[i].color + " 1)";
-            Init.context.fillRect(Init.columns[i].xPosition, Init.noteScrollWindowHeight - Notes.NOTE_HEIGHT / 2.0, Init.columnWidth - 1, Notes.NOTE_HEIGHT);
+            Init.context.fillRect(Init.columns[i].xPosition, Init.noteScrollWindowHeight - Notes.noteHeight() / 2.0, Init.columnWidth - 1, Notes.noteHeight());
         }
     }
 }

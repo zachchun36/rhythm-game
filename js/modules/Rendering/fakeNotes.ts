@@ -9,9 +9,9 @@ function drawFakeHeldNotes() {
             Init.context.fillStyle = Init.columns[i].color + " 1)";
             Init.context.fillRect(
                 Init.columns[i].xPosition,
-                Init.noteScrollWindowHeight - Notes.NOTE_HEIGHT / 2.0,
+                Init.noteScrollWindowHeight - Notes.noteHeight() / 2.0,
                 Init.columnWidth - 1,
-                Notes.NOTE_HEIGHT
+                Notes.noteHeight()
             );
         }
     }

@@ -2,7 +2,11 @@ import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
 import * as NoteTypes from "../Types/Note.js";
 
-const NOTE_HEIGHT = 7;
+const NOTE_HEIGHT_RATIO = 2.5/100.0;
+
+function noteHeight() {
+    return NOTE_HEIGHT_RATIO * Init.noteScrollWindowHeight;
+}
 
 function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
     if (
@@ -27,7 +31,7 @@ function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
                     Init.columns[note.column].xPosition
                 ),
                 endYPosition,
-                NOTE_HEIGHT,
+                noteHeight(), // arbitrary, this defines the width
                 tailHeight
             );
 
@@ -35,11 +39,11 @@ function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
             let grd = Init.context.createLinearGradient(
                 computeNoteTailXPosition(
                     Init.columns[note.column].xPosition
-                ) + NOTE_HEIGHT / 2,
+                ) + noteHeight() / 2,
                 0,
                 computeNoteTailXPosition(
                     Init.columns[note.column].xPosition
-                ) + NOTE_HEIGHT,
+                ) + noteHeight(),
                 0
             );
 
@@ -51,7 +55,7 @@ function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
                     Init.columns[note.column].xPosition
                 ),
                 endYPosition,
-                NOTE_HEIGHT,
+                noteHeight(),
                 tailHeight
             );
         }
@@ -70,7 +74,7 @@ function drawNotes() {
                     Init.columns[GameState.notes[i].column].xPosition,
                     yPosition,
                     Init.columnWidth - 1,
-                    NOTE_HEIGHT
+                    noteHeight()
                 );
                 
                 // Core Shadow
@@ -87,7 +91,7 @@ function drawNotes() {
                     Init.columns[GameState.notes[i].column].xPosition + Init.columnWidth / 2,
                     yPosition,
                     Init.columnWidth - Init.columnWidth / 2 - 1.5, // 1.5 for reflected light
-                    NOTE_HEIGHT
+                    noteHeight()
                 );
                 // Half-tone
                 let grdLeft = Init.context.createLinearGradient(
@@ -103,7 +107,7 @@ function drawNotes() {
                     Init.columns[GameState.notes[i].column].xPosition,
                     yPosition,
                     Init.columnWidth / 3,
-                    NOTE_HEIGHT
+                    noteHeight()
                 );
             }
         }
@@ -120,12 +124,12 @@ function computeNoteYPosition(noteTime: number) {
 }
 
 function computeNoteTailXPosition(columnX: number) {
-    return columnX + (Init.columnWidth - 1) / 2.0 - NOTE_HEIGHT / 2.0;
+    return columnX + (Init.columnWidth - 1) / 2.0 - noteHeight() / 2.0;
 }
 
 export {
     drawNoteTail,
     drawNotes,
     computeNoteYPosition,
-    NOTE_HEIGHT
+    noteHeight
 }

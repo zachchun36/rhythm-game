@@ -1,7 +1,7 @@
 import * as Init from "./init.js"
 import * as GameState from "../gameState.js";
 
-const PROGRESS_BAR_WIDTH = 3;
+const PROGRESS_BAR_WIDTH = 3;  //TODO
 
 
 function drawProgressBar(xPosition: number, progress: number, color: string) {

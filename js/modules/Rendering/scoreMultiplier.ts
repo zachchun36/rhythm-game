@@ -2,7 +2,7 @@ import * as Init from "./init.js"
 import * as GameState from "../gameState.js";
 import * as ProgressBar from "./progressBars.js";
 
-const FONT_HEIGHT = 32;
+const FONT_HEIGHT = 32; //TODO
 
 function drawScoreMultiplier() {
     let firstColumnXPosition = Init.columns[0].xPosition;

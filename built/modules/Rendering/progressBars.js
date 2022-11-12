@@ -1,6 +1,6 @@
 import * as Init from "./init.js";
 import * as GameState from "../gameState.js";
-const PROGRESS_BAR_WIDTH = 3;
+const PROGRESS_BAR_WIDTH = 3; //TODO
 function drawProgressBar(xPosition, progress, color) {
     let grd = Init.context.createLinearGradient(xPosition, 0, xPosition + PROGRESS_BAR_WIDTH, Init.noteScrollWindowHeightPlusTimingBoxes);
     grd.addColorStop(0, "rgba(256, 256, 256, .3)");
