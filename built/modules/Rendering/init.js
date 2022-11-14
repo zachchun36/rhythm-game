@@ -60,7 +60,7 @@ function initialRender() {
     canvas = document.getElementById("canvas");
     canvas.width = window.innerWidth * .25;
     canvas.height = window.innerHeight * .7;
-    fixDPI();
+    // fixDPI();
     columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
     noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
     noteScrollWindowHeightPlusTimingBoxes = noteScrollWindowHeight + columnWidth - 1;
