@@ -14,6 +14,7 @@ import * as TimingBarPulse from "./timingBarPulse.js";
 import * as HitNoteEffects from "./hitNoteEffects.js";
 import * as StatusBox from "./statusBox.js";
 import * as ScoreMultiplier from "./scoreMultiplier.js";
+import * as HealthBar from "./healthBar.js";
 
 // TODO refactor this out into hitNoteEffects.ts?
 const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
@@ -44,6 +45,7 @@ function draw(timeStamp: number) {
     HitNoteEffects.drawHitNoteTexts();
     HitNoteEffects.drawHitNoteCircles();
     StatusBox.drawStatusBox();
+    HealthBar.drawHealthBar();
     ScoreMultiplier.drawScoreMultiplier();
 }
 

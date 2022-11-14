@@ -83,6 +83,7 @@ function updateForMisses() {
             GameState.notes[i].missTriggered = true;
             GameState.resetCombo();
             GameState.changeBeetJuice(-2);
+            GameState.decreaseHealth(15);
             Render.drawNoteTimingEffects(GameState.NOTE_TIMINGS.MISS, NO_HIT_Y, GameState.notes[i].column);
         }
         else if (timePassedSinceNoteTime < 0) {
@@ -153,16 +154,19 @@ function processNoteHit(currentTime, currentNote, i) {
             noteTiming = GameState.NOTE_TIMINGS.PERFECT;
             changeBeet = 1;
             changeScore = 100;
+            GameState.increaseHealth(4);
         }
         else if (timingDelta < 0.08) {
             noteTiming = GameState.NOTE_TIMINGS.GREAT;
             changeBeet = .6;
             changeScore = 75;
+            GameState.increaseHealth(2);
         }
         else {
             noteTiming = GameState.NOTE_TIMINGS.GOOD;
             changeBeet = .2;
             changeScore = 50;
+            GameState.increaseHealth(1);
         }
     }
     else if (timingDelta < 0.2) {
@@ -170,6 +174,7 @@ function processNoteHit(currentTime, currentNote, i) {
         noteTiming = GameState.NOTE_TIMINGS.BAD;
         changeBeet = -1;
         changeScore = 25;
+        GameState.decreaseHealth(10);
     }
     GameState.changeBeetJuice(changeBeet);
     GameState.increaseScore(changeScore);

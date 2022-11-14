@@ -25,6 +25,7 @@ let flairCount = 0;
 
 let score = 0;
 let combo = 0;
+let health = 100;
 
 type ColumnState = {
     keyDown: boolean,
@@ -131,6 +132,17 @@ function incrementFlair() {
     flairCount++;
 }
 
+function increaseHealth(amount: number) {
+    health += amount;
+    if (health > 100) {
+        health = 100;
+    }
+}
+
+function decreaseHealth(amount: number) {
+    health-= amount;
+}
+
 export {
     notes,
     columns,
@@ -142,6 +154,9 @@ export {
     combo,
     incrementCombo,
     resetCombo,
+    health,
+    increaseHealth,
+    decreaseHealth,
     flairCount,
     incrementFlair,
     beetJuice,

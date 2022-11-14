@@ -35,32 +35,12 @@ let noteScrollWindowHeight;
 let noteScrollWindowHeightPlusTimingBoxes;
 const COLUMN_WIDTH_RATIO = 1 / 10.0;
 const NOTE_SCROLL_WINDOW_HEIGHT_RATIO = 2.0 / 3.0;
-function fixDPI() {
-    let dpi = window.devicePixelRatio;
-    console.log(dpi);
-    //get CSS height
-    //the + prefix casts it to an integer
-    //the slice method gets rid of "px"
-    let styleHeight = +getComputedStyle(canvas)
-        .getPropertyValue("height")
-        .slice(0, -2);
-    //get CSS width
-    let styleWidth = +getComputedStyle(canvas)
-        .getPropertyValue("width")
-        .slice(0, -2);
-    //scale the canvas
-    console.log(canvas.height);
-    canvas.setAttribute("height", (styleHeight * dpi).toString());
-    canvas.setAttribute("width", (styleWidth * dpi).toString());
-    console.log(canvas.height);
-}
 function initialRender() {
     // Get a reference to the canvas
     console.log("hello");
     canvas = document.getElementById("canvas");
     canvas.width = window.innerWidth * .25;
     canvas.height = window.innerHeight * .7;
-    // fixDPI();
     columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
     noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
     noteScrollWindowHeightPlusTimingBoxes = noteScrollWindowHeight + columnWidth - 1;
