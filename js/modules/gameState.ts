@@ -26,6 +26,7 @@ let flairCount = 0;
 let score = 0;
 let combo = 0;
 let health = 100;
+let gameOver = false;
 
 type ColumnState = {
     keyDown: boolean,
@@ -137,10 +138,17 @@ function increaseHealth(amount: number) {
     if (health > 100) {
         health = 100;
     }
+    
 }
 
 function decreaseHealth(amount: number) {
     health-= amount;
+    if (health < 0) {
+        health = 0;
+    }
+    if (health == 0) {
+        gameOver = true;
+    }
 }
 
 export {
@@ -166,5 +174,6 @@ export {
     SMOOTHIE_TIME_THRESHOlD,
     SMOOTHIE_TIME_SCORE_MULTIPLIER,
     NOTE_TIMINGS,
-    ColumnState
+    ColumnState,
+    gameOver
 };

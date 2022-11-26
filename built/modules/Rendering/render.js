@@ -14,11 +14,15 @@ import * as HitNoteEffects from "./hitNoteEffects.js";
 import * as StatusBox from "./statusBox.js";
 import * as ScoreMultiplier from "./scoreMultiplier.js";
 import * as HealthBar from "./healthBar.js";
+import * as GameOver from "./gameOver.js";
 // TODO refactor this out into hitNoteEffects.ts?
 const GOOD_COLOR_RGB = "rgba(232, 196, 16, ";
 const BAD_COLOR_RGB = "rgba(227, 91, 45, ";
 const MISS_COLOR_RGB = "rgba(227, 227, 227, ";
 function draw(timeStamp) {
+    if (GameState.health <= 0) {
+        Init.context.globalAlpha = 0.1;
+    }
     Init.context.clearRect(0, 0, Init.canvas.width, Init.canvas.height);
     Init.context.fillStyle = "black";
     Init.context.fillRect(0, 0, Init.canvas.width, Init.canvas.height);
@@ -39,6 +43,11 @@ function draw(timeStamp) {
     StatusBox.drawStatusBox();
     HealthBar.drawHealthBar();
     ScoreMultiplier.drawScoreMultiplier();
+    if (GameState.health <= 0) {
+        // reset for drawing game screen
+        Init.context.globalAlpha = 1.0;
+        GameOver.drawGameOver();
+    }
 }
 function drawNoteTimingEffects(noteTimingGrade, rawNoteTime, index) {
     let hitY = Notes.computeNoteYPosition(rawNoteTime);

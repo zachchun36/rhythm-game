@@ -16,6 +16,7 @@ let flairCount = 0;
 let score = 0;
 let combo = 0;
 let health = 100;
+let gameOver = false;
 const notes = [];
 const heldNotesHit = [];
 const song = new Audio("mp3s/snow-drop.mp3");
@@ -114,5 +115,11 @@ function increaseHealth(amount) {
 }
 function decreaseHealth(amount) {
     health -= amount;
+    if (health < 0) {
+        health = 0;
+    }
+    if (health == 0) {
+        gameOver = true;
+    }
 }
-export { notes, columns, song, heldNotesHit, score, increaseScore, getScoreMultiplier, combo, incrementCombo, resetCombo, health, increaseHealth, decreaseHealth, flairCount, incrementFlair, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS };
+export { notes, columns, song, heldNotesHit, score, increaseScore, getScoreMultiplier, combo, incrementCombo, resetCombo, health, increaseHealth, decreaseHealth, flairCount, incrementFlair, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS, gameOver };

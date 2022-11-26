@@ -4,6 +4,7 @@ import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
 import * as Notes from "./Rendering/notes.js";
+import * as Init from "./Rendering/init.js";
 
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
@@ -105,11 +106,18 @@ function updateForMisses() {
                 NO_HIT_Y,
                 GameState.notes[i].column
             );
+            if (GameState.health <= 0) {
+                processGameOver();
+            }
         } else if (timePassedSinceNoteTime < 0) {
             break;
         }
         i++;
     }
+}
+
+function processGameOver() {
+    GameState.song.pause();
 }
 
 function inputsMatchesFlair(idealFlair: number[]) {
@@ -200,6 +208,9 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
         changeBeet = -1;
         changeScore = 25;
         GameState.decreaseHealth(10);
+        if (GameState.health <= 0) {
+            processGameOver();
+        }
     }
 
     GameState.changeBeetJuice(changeBeet);
@@ -235,6 +246,9 @@ function releaseHeldNoteForIndex(index: number) {
 }
 
 function keydown(e: KeyboardEvent) {
+    if (GameState.gameOver) {
+        return;
+    }
     // console.log(e.keyCode);
     let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {

@@ -85,12 +85,18 @@ function updateForMisses() {
             GameState.changeBeetJuice(-2);
             GameState.decreaseHealth(15);
             Render.drawNoteTimingEffects(GameState.NOTE_TIMINGS.MISS, NO_HIT_Y, GameState.notes[i].column);
+            if (GameState.health <= 0) {
+                processGameOver();
+            }
         }
         else if (timePassedSinceNoteTime < 0) {
             break;
         }
         i++;
     }
+}
+function processGameOver() {
+    GameState.song.pause();
 }
 function inputsMatchesFlair(idealFlair) {
     for (let i = 0; i < sevenRecentKeyPresses.length; i++) {
@@ -175,6 +181,9 @@ function processNoteHit(currentTime, currentNote, i) {
         changeBeet = -1;
         changeScore = 25;
         GameState.decreaseHealth(10);
+        if (GameState.health <= 0) {
+            processGameOver();
+        }
     }
     GameState.changeBeetJuice(changeBeet);
     GameState.increaseScore(changeScore);
@@ -199,6 +208,9 @@ function releaseHeldNoteForIndex(index) {
     }
 }
 function keydown(e) {
+    if (GameState.gameOver) {
+        return;
+    }
     // console.log(e.keyCode);
     let keyCodeIndex = KEY_CODES.indexOf(e.keyCode);
     if (keyCodeIndex !== -1) {
@@ -212,6 +224,24 @@ function keyup(e) {
         GameState.columns[keyCodeIndex].keyDown = false;
     }
 }
+function getMousePos(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+// function isInside(pos, rect){
+//     return pos.x > rect.x && pos.x < rect.x+rect.width && pos.y < rect.y+rect.height && pos.y > rect.y
+// }
+// Init.canvas.addEventListener('click', function(evt: any) {
+//     var mousePos = getMousePos(Init.canvas, evt);
+//     if (isInside(mousePos,rect) && ) {
+//         alert('clicked inside rect');
+//     }else{
+//         alert('clicked outside rect');
+//     }   
+// }, false);
 function getSafeStartingIndex() {
     let i = mostRecentNoteIndex + 1;
     // TODO Clean this logic up
