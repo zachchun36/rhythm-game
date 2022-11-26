@@ -233,7 +233,6 @@ function processNoteHit(currentTime: number, currentNote: NoteTypes.Note, i: num
     return false;
 }
 
-// test comment
 function releaseHeldNoteForIndex(index: number) {
     for (let i = 0; i < GameState.heldNotesHit.length; i++) {
         if (GameState.heldNotesHit[i].column === index) {

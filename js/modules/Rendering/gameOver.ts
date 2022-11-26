@@ -2,10 +2,10 @@
 import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
 
-const FONT_HEIGHT: number = 64;
+
 
 function drawGameOver() {
-
+    const FONT_HEIGHT: number = Init.canvas.width / 8;
 
     Init.context.font = FONT_HEIGHT + "px Courier New";
     Init.context.fillStyle = "black";
@@ -14,7 +14,7 @@ function drawGameOver() {
     // say game over
     // draw button for retry
 
-    
+
 }
 
 export {

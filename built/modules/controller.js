@@ -196,7 +196,6 @@ function processNoteHit(currentTime, currentNote, i) {
     }
     return false;
 }
-// test comment
 function releaseHeldNoteForIndex(index) {
     for (let i = 0; i < GameState.heldNotesHit.length; i++) {
         if (GameState.heldNotesHit[i].column === index) {
@@ -224,24 +223,6 @@ function keyup(e) {
         GameState.columns[keyCodeIndex].keyDown = false;
     }
 }
-function getMousePos(canvas, event) {
-    var rect = canvas.getBoundingClientRect();
-    return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-    };
-}
-// function isInside(pos, rect){
-//     return pos.x > rect.x && pos.x < rect.x+rect.width && pos.y < rect.y+rect.height && pos.y > rect.y
-// }
-// Init.canvas.addEventListener('click', function(evt: any) {
-//     var mousePos = getMousePos(Init.canvas, evt);
-//     if (isInside(mousePos,rect) && ) {
-//         alert('clicked inside rect');
-//     }else{
-//         alert('clicked outside rect');
-//     }   
-// }, false);
 function getSafeStartingIndex() {
     let i = mostRecentNoteIndex + 1;
     // TODO Clean this logic up
