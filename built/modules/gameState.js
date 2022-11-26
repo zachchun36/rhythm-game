@@ -17,7 +17,8 @@ let score = 0;
 let combo = 0;
 let health = 100;
 let gameOver = false;
-const notes = [];
+let notes = [];
+let backupNotes = [];
 const heldNotesHit = [];
 const song = new Audio("mp3s/snow-drop.mp3");
 const columns = [{
@@ -61,6 +62,17 @@ for (let i = 0; i < 350; i++) {
         missTriggered: false
     });
 }
+function copyNotesToBackup() {
+    for (let i = 0; i < notes.length; i++) {
+        backupNotes.push({
+            time: notes[i].time,
+            endTime: notes[i].endTime,
+            column: notes[i].column,
+            missTriggered: false
+        });
+    }
+}
+copyNotesToBackup();
 function changeBeetJuice(amount) {
     beetJuice += amount;
     if (beetJuice > MAX_BEET_JUICE) {
@@ -122,4 +134,18 @@ function decreaseHealth(amount) {
         gameOver = true;
     }
 }
-export { notes, columns, song, heldNotesHit, score, increaseScore, getScoreMultiplier, combo, incrementCombo, resetCombo, health, increaseHealth, decreaseHealth, flairCount, incrementFlair, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS, gameOver };
+function reset() {
+    notes = backupNotes;
+    backupNotes = [];
+    copyNotesToBackup();
+    score = 0;
+    health = 100;
+    combo = 0;
+    flairCount = 0;
+    beetJuice = 0;
+    smoothieTime = false;
+    gameOver = false;
+    song.load();
+    song.play();
+}
+export { notes, columns, song, heldNotesHit, score, increaseScore, getScoreMultiplier, combo, incrementCombo, resetCombo, health, increaseHealth, decreaseHealth, flairCount, incrementFlair, beetJuice, changeBeetJuice, activateSmoothieTime, smoothieTime, SMOOTHIE_TIME_THRESHOlD, SMOOTHIE_TIME_SCORE_MULTIPLIER, NOTE_TIMINGS, gameOver, reset };

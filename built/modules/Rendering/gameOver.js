@@ -1,10 +1,25 @@
 import * as Init from "./init.js";
+let buttonX;
+let buttonY;
+let buttonWidth;
+let buttonHeight;
 function drawGameOver() {
-    const FONT_HEIGHT = Init.canvas.width / 8;
-    Init.context.font = FONT_HEIGHT + "px Courier New";
+    const GAME_OVER_FONT_HEIGHT = Init.canvas.width / 8;
+    const BUTTON_WIDTH = Init.canvas.width / 3;
+    const BUTTON_HEIGHT = GAME_OVER_FONT_HEIGHT * 1.5;
+    Init.context.font = GAME_OVER_FONT_HEIGHT + "px Courier New";
     Init.context.fillStyle = "black";
     Init.context.fillText("GAME OVER", Init.columns[0].xPosition, Init.noteScrollWindowHeight / 2);
     // say game over
     // draw button for retry
+    Init.context.beginPath();
+    buttonX = BUTTON_WIDTH;
+    buttonY = Init.noteScrollWindowHeight / 2 + 2 * GAME_OVER_FONT_HEIGHT;
+    buttonWidth = BUTTON_WIDTH;
+    buttonHeight = BUTTON_HEIGHT;
+    Init.context.rect(buttonX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT);
+    Init.context.stroke();
+    Init.context.font = GAME_OVER_FONT_HEIGHT * .75 + "px Courier New";
+    Init.context.fillText("RETRY", BUTTON_WIDTH, Init.noteScrollWindowHeight / 2 + 2 * GAME_OVER_FONT_HEIGHT + BUTTON_HEIGHT / 2);
 }
-export { drawGameOver };
+export { drawGameOver, buttonX, buttonY, buttonWidth, buttonHeight };

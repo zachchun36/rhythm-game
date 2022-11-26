@@ -2,6 +2,7 @@
 import * as Render from "./Rendering/render.js";
 import * as GameState from "./gameState.js";
 import * as NoteTypes from "./Types/Note.js";
+import * as Init from "./Rendering/init.js";
 const S_KEYCODE = 83;
 const D_KEYCODE = 68;
 const F_KEYCODE = 70;
@@ -97,6 +98,14 @@ function updateForMisses() {
 }
 function processGameOver() {
     GameState.song.pause();
+    Init.canvas.addEventListener('click', function (evt) {
+        var mousePos = getMousePos(Init.canvas, evt);
+        if (isInside(mousePos, Render.getGameOverButtonDimensions())) {
+            // do restart
+            GameState.reset();
+            mostRecentNoteIndex = -1;
+        }
+    }, false);
 }
 function inputsMatchesFlair(idealFlair) {
     for (let i = 0; i < sevenRecentKeyPresses.length; i++) {
@@ -222,6 +231,17 @@ function keyup(e) {
     if (keyCodeIndex !== -1) {
         GameState.columns[keyCodeIndex].keyDown = false;
     }
+}
+function getMousePos(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+//Function to check whether a point is inside a rectangle
+function isInside(pos, rect) {
+    return pos.x > rect.x && pos.x < rect.x + rect.width && pos.y < rect.y + rect.height && pos.y > rect.y;
 }
 function getSafeStartingIndex() {
     let i = mostRecentNoteIndex + 1;

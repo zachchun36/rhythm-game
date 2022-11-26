@@ -85,7 +85,17 @@ function drawNoteTimingEffects(noteTimingGrade: string, rawNoteTime: number, ind
     }
 }
 
+function getGameOverButtonDimensions() {
+    return {
+        x: GameOver.buttonX,
+        y: GameOver.buttonY,
+        width: GameOver.buttonWidth,
+        height: GameOver.buttonWidth
+    }
+}
+
 export {
     draw,
-    drawNoteTimingEffects
+    drawNoteTimingEffects,
+    getGameOverButtonDimensions
 };

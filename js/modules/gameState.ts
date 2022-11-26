@@ -34,7 +34,9 @@ type ColumnState = {
 }
 
 
-const notes: (Note | CompletedNote | HeldNote)[] = [];
+let notes: (Note | CompletedNote | HeldNote)[] = [];
+let backupNotes: (Note | CompletedNote | HeldNote)[] = [];
+
 const heldNotesHit: HeldNote[] = [];
 const song = new Audio("mp3s/snow-drop.mp3");
 const columns: ColumnState[] = [{
@@ -82,6 +84,18 @@ for (let i = 0; i < 350; i++) {
 
 }
 
+function copyNotesToBackup() {
+    for (let i = 0; i < notes.length; i++) {
+        backupNotes.push({
+            time: notes[i].time,
+            endTime: (notes[i] as HeldNote).endTime,
+            column: notes[i].column,
+            missTriggered: false
+        })
+    }
+}
+
+copyNotesToBackup();
 
 function changeBeetJuice(amount: number) {
     beetJuice += amount;
@@ -151,6 +165,21 @@ function decreaseHealth(amount: number) {
     }
 }
 
+function reset() {
+    notes = backupNotes;
+    backupNotes = [];
+    copyNotesToBackup();
+    score = 0;
+    health = 100;
+    combo = 0;
+    flairCount = 0;
+    beetJuice = 0;
+    smoothieTime = false;
+    gameOver = false;      
+    song.load();
+    song.play();
+}
+
 export {
     notes,
     columns,
@@ -175,5 +204,6 @@ export {
     SMOOTHIE_TIME_SCORE_MULTIPLIER,
     NOTE_TIMINGS,
     ColumnState,
-    gameOver
+    gameOver,
+    reset
 };

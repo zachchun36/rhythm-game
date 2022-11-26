@@ -118,6 +118,16 @@ function updateForMisses() {
 
 function processGameOver() {
     GameState.song.pause();
+    Init.canvas.addEventListener('click', function(evt: any) {
+        var mousePos = getMousePos(Init.canvas, evt);
+    
+        if (isInside(mousePos, Render.getGameOverButtonDimensions())) {
+            // do restart
+
+            GameState.reset();
+            mostRecentNoteIndex = -1;
+        }
+    }, false);
 }
 
 function inputsMatchesFlair(idealFlair: number[]) {
@@ -262,6 +272,21 @@ function keyup(e: KeyboardEvent) {
         GameState.columns[keyCodeIndex].keyDown = false;
     }
 }
+
+function getMousePos(canvas: Element, event: MouseEvent ) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+//Function to check whether a point is inside a rectangle
+function isInside(pos: any, rect: any){
+    return pos.x > rect.x && pos.x < rect.x+rect.width && pos.y < rect.y+rect.height && pos.y > rect.y
+}
+
+
+
 
 function getSafeStartingIndex() {
     let i = mostRecentNoteIndex + 1;

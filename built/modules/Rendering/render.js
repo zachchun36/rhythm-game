@@ -74,4 +74,12 @@ function drawNoteTimingEffects(noteTimingGrade, rawNoteTime, index) {
             HitNoteEffects.createHitNoteTextObject(" Miss", index, MISS_COLOR_RGB);
     }
 }
-export { draw, drawNoteTimingEffects };
+function getGameOverButtonDimensions() {
+    return {
+        x: GameOver.buttonX,
+        y: GameOver.buttonY,
+        width: GameOver.buttonWidth,
+        height: GameOver.buttonWidth
+    };
+}
+export { draw, drawNoteTimingEffects, getGameOverButtonDimensions };
