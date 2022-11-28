@@ -3,9 +3,14 @@ import * as Init from "./init.js";
 import * as NoteTypes from "../Types/Note.js";
 
 const NOTE_HEIGHT_RATIO = 2.5/100.0;
+const NOTE_TAIL_WIDTH_RATIO = 0.03;
 
 function noteHeight() {
     return NOTE_HEIGHT_RATIO * Init.noteScrollWindowHeight;
+}
+
+function noteTailWidth() {
+    return NOTE_TAIL_WIDTH_RATIO * Init.canvas.width;
 }
 
 function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
@@ -31,7 +36,7 @@ function drawNoteTail(note: NoteTypes.Note, yPosition: number) {
                     Init.columns[note.column].xPosition
                 ),
                 endYPosition,
-                noteHeight(), // arbitrary, this defines the width
+                noteTailWidth(), // arbitrary, this defines the width
                 tailHeight
             );
 

@@ -2,8 +2,12 @@ import * as GameState from "../gameState.js";
 import * as Init from "./init.js";
 import * as NoteTypes from "../Types/Note.js";
 const NOTE_HEIGHT_RATIO = 2.5 / 100.0;
+const NOTE_TAIL_WIDTH_RATIO = 0.03;
 function noteHeight() {
     return NOTE_HEIGHT_RATIO * Init.noteScrollWindowHeight;
+}
+function noteTailWidth() {
+    return NOTE_TAIL_WIDTH_RATIO * Init.canvas.width;
 }
 function drawNoteTail(note, yPosition) {
     if (NoteTypes.isHeldNote(note) &&
@@ -19,7 +23,7 @@ function drawNoteTail(note, yPosition) {
         }
         if (endYPosition + tailHeight >= 0 &&
             endYPosition <= Init.noteScrollWindowHeight) {
-            Init.context.fillRect(computeNoteTailXPosition(Init.columns[note.column].xPosition), endYPosition, noteHeight(), // arbitrary, this defines the width
+            Init.context.fillRect(computeNoteTailXPosition(Init.columns[note.column].xPosition), endYPosition, noteTailWidth(), // arbitrary, this defines the width
             tailHeight);
             let grd = Init.context.createLinearGradient(computeNoteTailXPosition(Init.columns[note.column].xPosition) + noteHeight() / 2, 0, computeNoteTailXPosition(Init.columns[note.column].xPosition) + noteHeight(), 0);
             grd.addColorStop(0, "rgba(0, 0, 0, 0.2");

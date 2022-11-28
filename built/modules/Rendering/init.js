@@ -39,8 +39,24 @@ function initialRender() {
     // Get a reference to the canvas
     console.log("hello");
     canvas = document.getElementById("canvas");
-    canvas.width = window.innerWidth * .25;
-    canvas.height = window.innerHeight * .7;
+    if (window.innerWidth <= 1024 || window.innerHeight <= 768) {
+        canvas.width = 333;
+        canvas.height = 600;
+    }
+    else if (window.innerWidth <= 1600 || window.innerHeight <= 900) {
+        canvas.width = 427;
+        canvas.height = 768; // chosen so that if inner height is 769 it will still fit on the page
+    }
+    else { // 1920 x 1080
+        canvas.width = 500;
+        canvas.height = 900;
+    }
+    console.log(window.innerWidth);
+    console.log(window.innerHeight);
+    console.log(canvas.width);
+    console.log(canvas.height);
+    // canvas.width  = window.innerWidth * .25;
+    // canvas.height = window.innerHeight * .7;
     columnWidth = canvas.width * COLUMN_WIDTH_RATIO;
     noteScrollWindowHeight = canvas.height * NOTE_SCROLL_WINDOW_HEIGHT_RATIO;
     noteScrollWindowHeightPlusTimingBoxes = noteScrollWindowHeight + columnWidth - 1;
